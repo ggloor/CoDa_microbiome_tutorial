@@ -1,0 +1,131 @@
+
+---
+title: "CoDa and sequencing"
+author: "gg"
+date: "april 8, 2016"
+fig_caption: true
+output:
+    pdf_document:
+        fig_caption: yes
+---
+
+To run this file:
+Rscript -e "rmarkdown::render('multi_comp.Rmd')
+
+It is assumed that the output from a high-throughput sequencing experiment represents in some way the underlying abundance of the input DNA molecules. This is not necessarily the case as explained by the following thought experiment.
+
+```{r, echo=F, fig.width=10, results='asis', fig.cap="High-throughput sequencing affects the shape of the data differently on constrained and unconstrained data. The two left panels show the absolute number of reads in the input tube for 20 steps where the green and black OTUs are changing abundance by 2-fold each step. The gray, blue and red OTUs are held at a constant number in each step in both cases. The second column shows the output in proportions (or ppm, or FPKM) after random sampling to a constant sum, as occurs on the sequencer. The orange OTU in the constrained data set is much more abundant than any other, and is changing to maintain a constant number of input molecules. Samples in the two right columns are the same values plotted on a log scale on the Y-axis for convenience. Note how the constrained data is the same before and after sequencing while the unconstrained data is severely distorted."}
+rdirichlet <- function (n, alpha)
+{
+  if(length(n) > 1) n <- length(n)
+  #if(length(n) == 0 || as.integer(n) == 0) return(numeric(0))
+  #n <- as.integer(n)
+  if(n < 0) stop("value(n) can not be negative in rtriang")
+
+  if(is.vector(alpha)) alpha <- t(alpha)
+  l <- dim(alpha)[2]
+  x <- matrix(rgamma(l * n, t(alpha)), ncol = l, byrow=TRUE)  # Gere le recycling
+  return(x / rowSums(x))
+}
+
+num.one = 100 # the number of rare-counts in the dataset
+
+mat.double <- matrix(data=NA, nrow=20, ncol=num.one + 10)
+prop.mat <- matrix(data=NA, nrow=20, ncol=num.one + 10)
+clr.mat <- matrix(data=NA, nrow=20, ncol=num.one + 10)
+
+mat.double.u <- matrix(data=NA, nrow=20, ncol=num.one + 10)
+prop.mat.u <- matrix(data=NA, nrow=20, ncol=num.one + 10)
+clr.mat.u <- matrix(data=NA, nrow=20, ncol=num.one + 10)
+
+# constant sum input
+minimum.count <- 1 # multiplier to set minimum count for in.put
+# non-constant sum input with both one big increase
+in.put <- c(10,20971,1,1,5,10,20,50,100,200,1000) * minimum.count
+
+total.sum <- sum(in.put + 1) * 1000
+
+for(i in 0:19){
+	# constant sum input
+	junk <- in.put * c(2^i, rep(1,num.one + 9))
+	junk[3] <- total.sum - sum(junk)
+	mat.double[i+1,] <- junk
+	prop.mat[i+1,] <- as.numeric( rdirichlet(1, junk) )
+	clr.mat[i+1,] <- log2(prop.mat[i+1,]) - mean(log2(prop.mat[i+1,]))
+}
+
+for(i in 0:19){
+	# non-constant sum input
+	#junk <- in.put * c(2^i, rep(1,num.one + 9))
+	junk <- in.put * c(2^i, rep(1,num.one + 9))
+	mat.double.u[i+1,] <- junk
+	prop.mat.u[i+1,] <- as.numeric( rdirichlet(1, junk) )
+	clr.mat.u[i+1,] <- 2^(log2(prop.mat.u[i+1,]) - mean(log2(prop.mat.u[i+1,])))
+}
+
+par(mfrow=c(2,4), mar=c(4,4,3,1) )
+
+plot(mat.double[,1], pch=20, type="b",  ylim=c(min(mat.double), max(mat.double)), xlab="time point", ylab="raw count")
+title( main="Constrained\ninput (linear)", adj=0.5)
+points(mat.double[,2], type="b",pch=21, col="gray")
+points(mat.double[,3], type="b",pch=22, col="orange")
+points(mat.double[,num.one + 10], type="b",pch=23, col="blue")
+points(mat.double[,num.one+4], type="b",pch=24, col="red")
+
+plot(prop.mat[,1], pch=20, type="b", ylim=c(min(prop.mat[,num.one+4]), max(prop.mat)), xlab="time point", ylab="raw proportion")
+title( main="Constrained\nproportion (linear)", adj=0.5)
+points(prop.mat[,2], type="b", pch=21, col="gray")
+points(prop.mat[,3], type="b", pch=22, col="orange")
+points(prop.mat[,num.one+10], type="b", pch=23, col="blue")
+points(prop.mat[,num.one+4], type="b", pch=24, col="red")
+
+plot(mat.double.u[,1], pch=20, type="b",  ylim=c(min(mat.double.u), max(mat.double.u)), xlab="time point", ylab="raw count")
+title( main="Unconstrained\ninput (linear)", adj=0.5)
+points(mat.double.u[,2], type="b",pch=21, col="gray")
+points(mat.double.u[,num.one + 10], type="b",pch=23, col="blue")
+points(mat.double.u[,num.one+4], type="b",pch=24, col="red")
+
+plot(prop.mat.u[,1], pch=20, type="b", ylim=c(min(prop.mat.u[,num.one+4]), max(prop.mat.u)), xlab="time point", ylab="raw proportion")
+title( main="Unconstrained\nproportion (linear)", adj=0.5)
+points(prop.mat.u[,2], type="b", pch=21, col="gray")
+points(prop.mat.u[,num.one+10], type="b", pch=23, col="blue")
+points(prop.mat.u[,num.one+4], type="b", pch=24, col="red")
+
+plot(mat.double[,1], pch=20, type="b", log="y", ylim=c(min(mat.double), max(mat.double)), xlab="time point", ylab="log10 count")
+title( main="Constrained\ninput (log)", adj=0.5)
+points(mat.double[,2], type="b",pch=21, col="gray")
+points(mat.double[,3], type="b",pch=22, col="orange")
+points(mat.double[,num.one + 10], type="b",pch=23, col="blue")
+points(mat.double[,num.one+4], type="b",pch=24, col="red")
+
+plot(prop.mat[,1], pch=20, type="b", ylim=c(min(prop.mat[,num.one+4]), max(prop.mat)), xlab="time point", log="y", ylab="log10 proportion")
+title( main="Constrained\nproportion (log)", adj=0.5)
+points(prop.mat[,2], type="b", pch=21, col="gray")
+points(prop.mat[,3], type="b", pch=22, col="orange")
+points(prop.mat[,num.one+10], type="b", pch=23, col="blue")
+points(clr.mat[,num.one+4], type="b", pch=24, col="red")
+
+plot(mat.double.u[,1], pch=20, type="b", log="y", ylim=c(min(mat.double.u), max(mat.double.u)), xlab="time point", ylab="log10 count")
+title( main="Unconstrained\ninput (log)", adj=0.5)
+points(mat.double.u[,2], type="b",pch=21, col="gray")
+points(mat.double.u[,num.one + 10], type="b",pch=23, col="blue")
+points(mat.double.u[,num.one+4], type="b",pch=24, col="red")
+
+
+plot(prop.mat.u[,1], pch=20, type="b", ylim=c(min(prop.mat.u[,num.one+4]), max(prop.mat.u)),log="y", xlab="time point", ylab="log10 proportion")
+title( main="Unconstrained\nproportion (log)", adj=0.5)
+points(prop.mat.u[,2], type="b", pch=21, col="gray")
+points(prop.mat.u[,num.one+10], type="b", pch=23, col="blue")
+points(prop.mat.u[,num.one+4], type="b", pch=24, col="red")
+```
+
+
+
+Figure 1 shows two idealized experiments with four different ways of looking at the exact same data: the top row shows the data as linear points, the bottom row shows the same data after a log transform. The constrained input shows the case where the total count of all nucleic acid species in the input is constrained to a constant sum. The unconstrained input shows the case where the total sum is not constrained to a constant sum. These are modelled as a time series, but any process would produce the same results, and in practice we will likely only be comparing the first and last points (before and after some intervention). These are shown in two different ways. The first is linear counts "input", the second is proportions. The bottome row
+
+Constrained datasets occur if the increase or decrease in any component is exactly compensated by the increase or decrease of one or more others. Here the total count remains constant across all experimental conditions. Examples of constrained datasets would include allele frequencies at a locus where the total has to be 1, and the RNA-seq where the induction of genes occurs in a steady- state cell culture. In this case, any process, such as sequencing that generates a proportion simply recapitulates the data with sampling error. The unspoken assumption in most high throughput experimental designs is that this assumption is true— it is not!
+
+An unconstrained dataset results if the total count is free to vary. Examples of unconstrained datasets would include ChIP-Seq, RNA-seq where we are examining two different conditions or cell populations, metagenomics, etc. Importantly, 16S rRNA gene sequencing analyses are almost always free to vary; that is, the total bacterial load is rarely constant in an environment. Thus, the unconstrained data type would be the predominant type of data that would be expected.
+
+The relative abundance panels on the right side of Figure  below shows the result of random sampling with a defined maximum value in these two types of datasets. This random sampling reflects the data that results from high throughput sequencing where the total number of reads is constrained by the instrument capacity. The data is represented as a proportion, but scales to parts per million or parts per billion without changing the shape. Here we see that the shape of the data after sequencing is very similar to the input data in the case of constrained, but is very different in the case of non-constrained data. In the unconstrained dataset, observe how the blue and red features appear to be constant over the first 10 time points, but then appear to decrease in abundance at later time points. Conversely, the black feature appears to increase linearly at early time points, but appears to become constant at late time points. Obviously, we would misinterpret what is happening if we compared early and late timepoints in the unconstrained dataset. It is also worth noting how the act of random sampling makes the proportional abundance of the rare OTU species uncertain in both the constrained and unconstrained data, but has little effect on the relative apparent effect on the relative abundance of OTUs with high counts.
+
