@@ -19,11 +19,11 @@ Multivariate data have more than one variable per sample. Multivariate data can 
 However, if the variables are dependent, then we have many unappreciated problems. Unfortunately, the typical high throughput sequencing dataset is multivariate and highly dependent. This dependency is forced upon the data by the sequencing instrument itself.
 
 
-Let us set up a thought experiment. Let us imagine we have a very simple dataset composed of 100 taxa and three samples. Note that everything about this example generalizes to datasets with more samples and to samples containing more taxa, it is just difficult to show this with an n-dimensional graphic. In this example, we will geneate counts for 100 taxa from a single experiment where the taxa abundance can range anywhere between 1 and an arbitrary number of counts. We will assume that we are actually counting the number of molecules belonging to each taxon, and that there is no practical upper limit on the number of molecules.
+Let us set up a thought experiment. Let us imagine we have a very simple dataset composed of 100 samples and three taxa. Note that everything about this example generalizes to datasets with more samples and  more taxa, it is just difficult to show this with an n-dimensional graphic. In this example, we will generate counts for 100 samples from a single experiment where the taxa abundance can range anywhere between 1 and an arbitrary number of counts. We will assume that we are actually counting the number of molecules belonging to each taxon, and that there is no practical upper limit on the number of molecules.
 
-We will save the special case of 0 for later. Now we have three multivariate observations with 100 variables.
+We will save the special case of 0 for later. Now we have 100 multivariate observations with three variables.
 
-```{r, echo=FALSE, results='show', fig.width=8, fig.height=3, message=FALSE,fig.cap="Counts were generated randomly for three samples labeled a, b and c, and were free to range from 1 to 1000 in a, up to 2000 in b, and up to 3000 in c. The correlation coefficient of each sample vs. each other is shown above the plots."}
+```{r, echo=FALSE, results='show', fig.width=8, fig.height=3, message=FALSE,fig.cap="Counts were generated randomly for three taxa labeled a, b and c, and were free to range from 1 to 1000 for a, up to 2000 for b, and up to 3000 for c. One hundred samples were generated. The correlation coefficient of each sample vs. each other is shown above the plots."}
 library(compositions)
 library(scatterplot3d)
 
@@ -50,7 +50,7 @@ plot(abc.comp[1,], abc.comp[3,], main=round(cor(abc.comp[1,],abc.comp[3,]),3))
 plot(abc.comp[2,], abc.comp[3,], main=round(cor(abc.comp[2,],abc.comp[3,]),3))
 ```
 
-The simple act of converting each count to a proportion markedly skews the data. Here we can see that the data now appear much more correlated and constrained. While this is a simple example with three samples, it is generalizable to any number of samples, and to any number of variables (taxa) in a sample.
+The simple act of converting each count to a proportion markedly skews the data. Here we can see that the data now appear much more correlated and constrained. While this is a simple example with three taxa, it is generalizable to any number of samples, and to any number of variables (taxa) in a sample.
 
 Why is this so?
 
