@@ -1,0 +1,205 @@
+---
+title: "First comparison"
+author: "gg"
+date: '`r format(Sys.time(), "%d %B, %Y")`'
+bibliography: ~/Library/texmf/bibtex/bib/bibdesk_refs.bib
+fig_caption: true
+output:
+    pdf_document:
+        fig_caption: yes
+---
+
+To run this file:
+Rscript -e "rmarkdown::render('first_aldex.Rmd')"
+## Types of data
+
+Comparison of 'differential abundance' is problematic for compositional data [@fernandes:2013;@fernandes:2014]. Since the apparent abundance of every value depends on the apparent abundance of every other value, we can get into real difficulties if we are not careful. Take the simple example where we have two samples. The samples contain the following counts for five taxa:
+
+\begin{math}
+A = [1000, 100, 50, 250]
+\end{math} and
+\begin{math}
+B=[10, 500, 250, 1250]
+\end{math}.
+
+We want to answer the question: Have the abundances of the taxa changed?
+
+We sequence, and have a total count of about 100 (it is a first generation machine!)
+
+So we get:
+\begin{math}A_s = [71,7,4,18], B_s = [1,25,12,62]
+\end{math}
+
+Note that these values appear to be very different between the groups. However, if we take one taxon as a reference, say taxon 4, and determine a ratio, i.d.:
+
+\begin{math}
+A_r = [ 74/18, 7/18, 4/18 ] = [ 4.1, 0.39, 0.22 ]
+\end{math}
+
+\begin{math}
+B_r = [ 1/62, 25/62, 12/62 ] = [ 0.02 , 0.40, 0.20 ]
+\end{math}
+
+Here we can see that if we assume one taxon is constant (taxon 4), then the last two are seen to be very similar in abundancd. Now we can infer that the majority of change is in the first taxon. We cannot compare the last taxon because it is assumed to be constant, that is, the assumed change in the last taxon is 0. This approach is the one used by ANCOM, a recently developed tool to assess change in microbiome datasets [@ancom:2015].
+
+Since we cannot know which taxon, if any, is constant, we can assume that a large number of the taxa exhibit only random changd.  Then rather than using one taxon as a reference we can use the geometric mean abundance of all taxa. Note: this approach works poorly if there are only a small number of taxa (less than about 50) or if the taxa are very asymmetrically distributed between groups. This approach is the one used by ALDEx2 [@fernandes:2013;@fernandes:2014], and is the method that we will use.
+
+One complication is that a genometric mean cannot be determined if any of the values have a count of 0. For pairwise comparisons
+
+
+```{r, echo=TRUE,eval=FALSE}
+library(ALDEx2)
+
+# read the dataset
+d.subset <- read.table("data/ak_vs_op.txt", row.names=1, header=T)
+# make a vector containing the two names of the conditions
+# in the same order as in the column names
+d.conds <- c(rep("up", length(grep("up", colnames(d.subset))) ),
+    rep("op", length(grep("op", colnames(d.subset)))) )
+# generate Monte-Carlo instances of the probability of observing each count
+# given the actual read count and the observed read count.
+# use a prior of 0.5, corresponding to maximal uncertainty about the read count
+# this returns a set of clr values, one for each mc instance
+d.x <- aldex.clr(d.subset, mc.samples=128)
+# calculate effect sizes for each mc instance, report the expected value
+d.eff <- aldex.effect(d.x, d.conds)
+# perform parametric or non-parametric tests for difference
+# report the expected value of the raw and BH-corrected P value
+d.tt <- aldex.ttest(d.x, d.conds)
+# concatenate everything into one file
+d.all <- data.frame(d.eff,d.tt)
+
+#### this can be slow, so I have pre-computed and saved the file
+
+```
+
+We will display the results using a number of different plots to show how each plot gives a different way of exploring the data. The mainstay that we advocate is the effect plot [@Gloor:2015], that plots the constituents of normalized change, or effect size.
+
+```{r, echo=TRUE,eval=TRUE, results='as.is', fig.width=7, fig.height=7, error=FALSE, message=FALSE, warning=FALSE, fig.cap="Plotted here are taxa with no difference between groups (grey), a statistically difference between groups (red), and with an effect larger than 1 (blue circles). These are plotted using different plots (described clockwise from top left). The effect plot [@Gloor:2015]illustrates the difference between groups vs. the dispersion (variance) within groups. If the effect is greater than one (outside the grey lines), then, on average the taxa are separable by eye when plotted; roughly, they would be seen to have a greater difference than standard deviation. Effect is a more robust measure of difference than are P values, since the latter depend on sample size; large sample sizes will always give low P values [@Halsey:2015aa]. We can see this here where the large sample size means that even highly variable OTUs are significantly different. The Bland-Altman plot [@altman:1983] compares difference and abundance, and is often seen in RNA-Seq data. The Volcano plot [@Cui:2003aa] shows the association between difference and P value, and the final plot shows the association between effect and P value. "}
+
+x.all <- read.table("data/ak_vs_op_aldex.txt", header=T, row.names=1)
+
+# get 'significant' set
+sig <- x.all$wi.eBH < 0.05
+eff <- abs(x.all$effect) > 1
+
+# plot all in transparent grey
+# low BH-corrected p values as red
+# effect sizes > 1 as blue+red
+par(fig=c(0,1,0,1), new=TRUE)
+
+par(fig=c(0,0.5,0.5,1), new=TRUE)
+plot(x.all$diff.win, x.all$diff.btw, col=rgb(0,0,0,0.3), pch=19,
+    cex=0.5, ylim=c(-6,6), xlim=c(0,6), xlab="dispersion", ylab="difference",
+    main="Effect plot")
+points(x.all$diff.win[sig], x.all$diff.btw[sig], col=rgb(1,0,0,0.3), pch=19, cex=0.5 )
+points(x.all$diff.win[eff], x.all$diff.btw[eff], col=rgb(0,0,1,0.6), pch=21, cex=0.7 )
+abline(0,1, lty=2, lwd=2, col=rgb(0,0,0,0.4))
+abline(0,-1, lty=2, lwd=2, col=rgb(0,0,0,0.4))
+
+par(fig=c(0.5,1,0.5,1), new=TRUE)
+plot(x.all$rab.all, x.all$diff.btw, col=rgb(0,0,0,0.3), pch=19,
+    cex=0.5, ylim=c(-6,6), xlab="clr abundance", ylab="difference",
+    main="Bland-Altman plot")
+points(x.all$rab.all[sig], x.all$diff.btw[sig], col=rgb(1,0,0,0.3), pch=19, cex=0.5 )
+points(x.all$rab.all[eff], x.all$diff.btw[eff], col=rgb(0,0,1,0.6), pch=21, cex=0.7 )
+
+par(fig=c(0,0.5,0,0.5), new=TRUE)
+plot(x.all$diff.btw, x.all$wi.ep, col=rgb(0,0,0,0.3), pch=19,
+    cex=0.5, xlab="difference", ylab="log p value",
+    main="Difference vs. p plot", log="y")
+points(x.all$diff.btw[sig], x.all$wi.ep[sig], col=rgb(1,0,0,0.3), pch=19, cex=0.5 )
+points(x.all$diff.btw[eff], x.all$wi.ep[eff], col=rgb(0,0,1,0.6), pch=21, cex=0.7 )
+
+par(fig=c(0.5,1,0,0.5), new=TRUE)
+plot(x.all$effect, x.all$wi.ep, col=rgb(0,0,0,0.3), pch=19,
+    cex=0.5,  xlab="effect", ylab="log p value",
+    main="Effect vs. p plot", log="y")
+points(x.all$effect[sig], x.all$wi.ep[sig], col=rgb(1,0,0,0.3), pch=19, cex=0.5 )
+points(x.all$effect[eff], x.all$wi.ep[eff], col=rgb(0,0,1,0.6), pch=21, cex=0.7 )
+
+
+```
+\newpage
+
+```{r, echo=FALSE,eval=TRUE, results='as.is', fig.width=7, fig.height=7, error=FALSE, message=FALSE, warning=FALSE, fig.cap="Histograms showing the separation between groups when choosing OTUs with large effect sizes (left), or OTUs with small effect size (right). OTUs with the largest effect are the 'most reliably different' between groups, and should be chosen over those that are 'most significantly different' whenever possible."}
+
+library(zCompositions)
+d.subset <- read.table("data/ak_vs_op.txt", sep="\t", header=T, row.names=1)
+d.n0 <- cmultRepl(t(d.subset), label=0, method="CZM")
+d.clr <- t(apply(d.n0, 1, function(x) log(x) - mean(log(x))))
+nms <- rownames(d.clr)
+
+clop <- rownames(x.all)[x.all$effect>1]
+clak <- rownames(x.all)[x.all$effect < -1]
+mean.op <- apply(d.clr[,clop], 1, mean)
+mean.ak <- d.clr[,clak] # only one value
+
+clop.sig <- rownames(x.all)[x.all$effect > 0 & x.all$effect < 0.05 & x.all$wi.eBH > 0.05]
+clak.sig <- rownames(x.all)[x.all$effect < 0 & x.all$effect > -0.05 & x.all$wi.eBH > 0.05]
+mean.op.sig <- apply(d.clr[,clop.sig], 1, mean)
+mean.ak.sig <- apply(d.clr[,clak.sig], 1, mean)
+
+par(mfrow=c(1,2))
+
+# most disinguishing
+hist(mean.op[grep("ak", nms)] - mean.ak[grep("ak", nms)], col=rgb(0,0,1,0.4), xlim=c(-8,8), ylim=c(0,80), xlab=("ratio op : ak"), main="Large effect")
+hist(mean.op[grep("op", nms)] - mean.ak[grep("op", nms)], col=rgb(1,0,0,0.4), add=T)
+
+# least disinguishing
+hist(mean.op.sig[grep("ak", nms)] - mean.ak.sig[grep("ak", nms)], col=rgb(0,0,1,0.4), xlim=c(-.4,.4), ylim=c(0,80), xlab=("ratio op : ak"), main="Small effect")
+hist(mean.op.sig[grep("op", nms)] - mean.ak.sig[grep("op", nms)], col=rgb(1,0,0,0.4), add=T)
+```
+
+\newpage
+
+
+```{r, echo=FALSE,eval=TRUE, results='as.is', fig.width=7, fig.height=7, error=FALSE, message=FALSE, warning=FALSE, fig.cap="The same plots for the supra and subgingival plaque samples. We see that we have statistical significance, but the biological relevance is difficult to defend because of the very small effect sizes."}
+y.all <- read.table("data/up_vs_op_aldex.txt", header=T, row.names=1)
+
+# get 'significant' set
+sig <- y.all$wi.eBH < 0.05
+eff <- abs(y.all$effect) > 1
+
+# plot all in transparent grey
+# low BH-corrected p values as red
+# effect sizes > 1 as blue+red
+par(fig=c(0,1,0,1), new=TRUE)
+
+par(fig=c(0,0.5,0.5,1), new=TRUE)
+plot(y.all$diff.win, y.all$diff.btw, col=rgb(0,0,0,0.3), pch=19,
+    cex=0.5, ylim=c(-6,6), xlim=c(0,6), xlab="dispersion", ylab="difference",
+    main="Effect plot")
+points(y.all$diff.win[sig], y.all$diff.btw[sig], col=rgb(1,0,0,0.3), pch=19, cex=0.5 )
+points(y.all$diff.win[eff], y.all$diff.btw[eff], col=rgb(0,0,1,0.6), pch=21, cex=0.7 )
+abline(0,1, lty=2, lwd=2, col=rgb(0,0,0,0.4))
+abline(0,-1, lty=2, lwd=2, col=rgb(0,0,0,0.4))
+
+par(fig=c(0.5,1,0.5,1), new=TRUE)
+plot(y.all$rab.all, y.all$diff.btw, col=rgb(0,0,0,0.3), pch=19,
+    cex=0.5, ylim=c(-6,6), xlab="clr abundance", ylab="difference",
+    main="Bland-Altman plot")
+points(y.all$rab.all[sig], y.all$diff.btw[sig], col=rgb(1,0,0,0.3), pch=19, cex=0.5 )
+points(y.all$rab.all[eff], y.all$diff.btw[eff], col=rgb(0,0,1,0.6), pch=21, cex=0.7 )
+
+par(fig=c(0,0.5,0,0.5), new=TRUE)
+plot(y.all$diff.btw, y.all$wi.ep, col=rgb(0,0,0,0.3), pch=19,
+    cex=0.5, xlab="difference", ylab="log p value",
+    main="Difference vs. p plot", log="y")
+points(y.all$diff.btw[sig], y.all$wi.ep[sig], col=rgb(1,0,0,0.3), pch=19, cex=0.5 )
+points(y.all$diff.btw[eff], y.all$wi.ep[eff], col=rgb(0,0,1,0.6), pch=21, cex=0.7 )
+
+par(fig=c(0.5,1,0,0.5), new=TRUE)
+plot(y.all$effect, y.all$wi.ep, col=rgb(0,0,0,0.3), pch=19,
+    cex=0.5,  xlab="effect", ylab="log p value",
+    main="Effect vs. p plot", log="y")
+points(y.all$effect[sig], y.all$wi.ep[sig], col=rgb(1,0,0,0.3), pch=19, cex=0.5 )
+points(y.all$effect[eff], y.all$wi.ep[eff], col=rgb(0,0,1,0.6), pch=21, cex=0.7 )
+
+
+```
+
+\newpage
+#References
+
+

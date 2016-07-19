@@ -2,7 +2,8 @@
 ---
 title: "CoDa and sequencing"
 author: "gg"
-date: "april 8, 2016"
+date: '`r format(Sys.time(), "%d %B, %Y")`'
+bibliography: ~/Library/texmf/bibtex/bib/bibdesk_refs.bib
 fig_caption: true
 output:
     pdf_document:
@@ -10,7 +11,7 @@ output:
 ---
 
 To run this file:
-Rscript -e "rmarkdown::render('multi_comp.Rmd')
+Rscript -e "rmarkdown::render('coda_seq.Rmd')
 
 It is assumed that the output from a high-throughput sequencing experiment represents in some way the underlying abundance of the input DNA molecules. This is not necessarily the case as explained by the following thought experiment.
 
