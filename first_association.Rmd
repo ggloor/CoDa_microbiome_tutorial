@@ -27,7 +27,7 @@ This plots the connectivity graph for $\phi <= 0.3$, and includes additional way
 ```{r, echo=FALSE,eval=TRUE,message=FALSE, warning=FALSE}
 library(ALDEx2)
 library(zCompositions)
-source("~/git/propr/R/propr-functions.R") # phi association functions
+source("chunk/R/propr-functions.R") # phi association functions
 library(igraph)
 oldcat=cat
 cat <- function(...) {}
