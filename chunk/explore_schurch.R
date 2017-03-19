@@ -6,6 +6,16 @@ output: pdf_document
 ---
 
 ```{r lib, include=FALSE, message=FALSE, warning=FALSE, echo=TRUE}
+# CRAN
+# install.packages("mypackage") propr, zCompositions, car
+
+#bioconductor
+# source("https://bioconductor.org/biocLite.R")
+# biocLite("ALDEx2") and DESeq and edgeR
+
+# github
+# install.packages('devtools')
+# devtools::install_github('ggloor/CoDaSeq/CoDaSeq')
 
 library(zCompositions)
 library(ALDEx2)
