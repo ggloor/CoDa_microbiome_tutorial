@@ -159,7 +159,7 @@ mvar.good <- sum(pcx.good$sdev^2)
 
 # plot and save
 par(mfrow=c(1,1))
-biplot(pcx.good, var.axes=F, scale=0, cex=c(2,.5))
+biplot(pcx.good, var.axes=F, scale=1, cex=c(1,.5))
 
 write.table(d.good.gt0, file="data/filtered_table.txt", sep="\t", quote=F, col.names=NA)
 ```
@@ -172,7 +172,7 @@ library(ALDEx2)
 
 # make a vector of conditions
 
-# you guys to make the distribution of possible values
+# make the distribution of possible values
 x <- aldex.clr(d.good.gt0)
 
 conds <- c(rep("SNF", length(SNF.g$good)), rep("WT", length(WT.g$good)))
