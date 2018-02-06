@@ -2,7 +2,7 @@
 title: "First comparison"
 author: "gg"
 date: '`r format(Sys.time(), "%d %B, %Y")`'
-bibliography: ~/Library/texmf/bibtex/bib/bibdesk_refs.bib
+bibliography: /Users/ggloor/Library/texmf/bibtex/bib/bibdesk_refs.bib
 fig_caption: true
 output:
     pdf_document:
@@ -10,7 +10,7 @@ output:
 ---
 
 To run this file:
-Rscript -e "rmarkdown::render('first_aldex.Rmd')"
+Rscript -e "rmarkdown::render('first_comparison.Rmd')"
 ## Types of data
 
 Comparison of 'differential abundance' is problematic for compositional data [@fernandes:2013;@fernandes:2014]. Since the apparent abundance of every value depends on the apparent abundance of every other value, we can get into real difficulties if we are not careful. Take the simple example where we have two samples. The samples contain the following counts for five taxa:
@@ -54,13 +54,13 @@ library(ALDEx2)
 d.subset <- read.table("data/ak_vs_op.txt", row.names=1, header=T)
 # make a vector containing the two names of the conditions
 # in the same order as in the column names
-d.conds <- c(rep("up", length(grep("up", colnames(d.subset))) ),
-    rep("op", length(grep("op", colnames(d.subset)))) )
+d.conds <- c(rep("ak", length(grep("ak", colnames(d.subset))) ), rep("op", length(grep("op", colnames(d.subset)))) )
 # generate Monte-Carlo instances of the probability of observing each count
 # given the actual read count and the observed read count.
 # use a prior of 0.5, corresponding to maximal uncertainty about the read count
 # this returns a set of clr values, one for each mc instance
-d.x <- aldex.clr(d.subset, mc.samples=128)
+# note that the latest version of ALDEx2 requires conditions explicitly
+d.x <- aldex.clr(d.subset, conds=d.conds, mc.samples=128)
 # calculate effect sizes for each mc instance, report the expected value
 d.eff <- aldex.effect(d.x, d.conds)
 # perform parametric or non-parametric tests for difference

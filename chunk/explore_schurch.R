@@ -173,9 +173,10 @@ library(ALDEx2)
 # make a vector of conditions
 # halsey "the ficle p value ...."
 # make the distribution of possible values
-x <- aldex.clr(d.good.gt0)
+conds <- c(rep("SNF", length(grep("SNF", colnames(d.good.gt0)))), rep("WT", length(grep("WT", colnames(d.good.gt0)))))
 
-conds <- c(rep("SNF", length(SNF.g$good)), rep("WT", length(WT.g$good)))
+x <- aldex.clr(d.good.gt0, conds)
+
 # me
 x <- aldex.clr(d.good.gt0, conds, mc.samples=16)
 
