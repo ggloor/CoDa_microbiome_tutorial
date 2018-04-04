@@ -12,14 +12,14 @@ output:
 To run this file:
 Rscript -e "rmarkdown::render('first_biplot.Rmd')"
 
-We will use as an example a transcriptome dataset [@\Schurch:2016aa;@Gierlinski:2015aa] containing 96 samples, 48 each from wt and SNF2 knockout strain These data have been filtered to include only those features that are present with a mean count of at least 0.1 across all samples.
+We will use as an example a transcriptome dataset [@Schurch:2016aa;@Gierlinski:2015aa] containing 96 samples, 48 each from wt and SNF2 knockout strain These data have been filtered to include only those features that are present with a mean count of at least 0.1 across all samples.
 
 The compositional biplot is the first exploratory data analysis tool that should be used whenever exploring a  dataset. It shows, in one plot, the essences of your results. Do my samples separate into groups? features are driving this separation? what features are irrelevant to the analysis?
 
 Compositional biplots appear to be complex and intimidating, but with a little patience and practice they are easily interpretable [@aitchison2002biplots]. They are based on the variance of the ratios of the parts, and are substantially more informative that the commonly used PCoA plots that are driven largely by abundance [@Gorvitovskaia:2016aa].
 
 
-```{r, echo=TRUE, results='as.is', fig.width=7, fig.height=7, error=FALSE, message=FALSE, warning=FALSE, fig.cap="The compositional biplot is the workhorse tool for CoDa. This plot summarizes the entire analysis in a qualitative manner. We can see that the op and ak samples separate very well, although the proportion of variance explained on component 1 is small. Furthermore, we can see the genus names of some of the features that are driving this divide. Finally, component 1 has substantially more variance than does componet 2, and we can explain this experiment as a simple two part comparison with the largest variance along the axis of the comparison."}
+```{r biplot, echo=TRUE, results='as.is', fig.width=7, fig.height=7, error=FALSE, message=FALSE, warning=FALSE, fig.cap="The compositional biplot is the workhorse tool for CoDa. This plot summarizes the entire analysis in a qualitative manner. We can see that the op and ak samples separate very well, although the proportion of variance explained on component 1 is small. Furthermore, we can see the genus names of some of the features that are driving this divide. Finally, component 1 has substantially more variance than does componet 2, and we can explain this experiment as a simple two part comparison with the largest variance along the axis of the comparison."}
 
 # read in the dataset and associated taxonomy file
 d.agg <- read.table("data/barton_agg.tsv", sep="\t", header=T, row.names=1)
@@ -82,7 +82,7 @@ plot(pcx, main="hist")
 We can see that there are a number of samples that appear to be outlier samples. Should we include SNF2.6 in the analysis or not? One of the messages of the Barton papers [@Schurch:2016aa;@Gierlinski:2015aa] was that about 10% of samples, even carefully prepared samples can be outliers for unknown methodological reasons. We approach outliers by finding those samples that contribute more variance than expected to the variance of the group. Outliers are defined as those samples that contribute greater than the median plus twice the interquartile range of the sample variance to the total variance of the group.
 
 
-```{r outlier, message=FALSE, warning=FALSE, echo=TRUE, fig.cap='outliers', fig.height=4, fig.width=14}
+```{r outlier, message=FALSE, warning=FALSE, echo=FALSE, fig.cap='outliers', fig.height=8, fig.width=8}
 # get the outliers from each group. See codaSeq.outlier
 # get WT indices
 WT <- grep("WT", rownames(d.agg))
@@ -132,11 +132,12 @@ biplot(pcx.SNF, var.axes=FALSE, scale=0, cex=c(1,.05))
 SNF.g <- codaSeq.outlier(SNF.agg.n0.clr, plot.me=TRUE)
 
 ```
+\clearpage
 \newpage
 
 Now we can make a biplot of only those samples that are non-outliers. We see that the SNF2 KO group is more homogeneous than is the WT group. Almost certainly since the SNF2 group is clonal, and the WT group is likely grown from a frozen culture.
 
-```{r good_data_pca, message=FALSE, warning=FALSE, echo=TRUE, fig.cap='outliers', fig.height=4, fig.width=14}
+```{r good_data_pca, message=FALSE, warning=FALSE, echo=FALSE, fig.cap='outliers', fig.height=7, fig.width=7}
 
 # make a dataset of only the non-outlier samples
 d.good <- rbind(d.agg[SNF.g$good,],d.agg[WT.g$good,])
@@ -170,6 +171,7 @@ abline(v=0, lty=2, lwd=2, col=rgb(0,0,0,0.3))
 
 We can do additional filtering. Examining the features, most contribute little, if anything, to the separation. These can be removed by filtering out low variance features. Note that we lose some resolution, but that we recapitulate the dataset with only half the features. We could do this iteratively.
 
+```{r lowvar, , message=FALSE, warning=FALSE, echo=FALSE, fig.cap='outliers', fig.height=7, fig.width=7}
 var.clr <- apply(d.good.agg.n0.clr, 2, var)
 nms <- which(var.clr > median(var.clr)) #
 
@@ -194,4 +196,5 @@ biplot(pcx.lv, var.axes=FALSE, scale=0, cex=c(1,.5),  xlab=PC1.lv, ylab=PC2.lv)
 abline(h=0, lty=2, lwd=2, col=rgb(0,0,0,0.3))
 abline(v=0, lty=2, lwd=2, col=rgb(0,0,0,0.3))
 # get the labels for the first two components
-#References
+```
+## References
