@@ -16,6 +16,6 @@ Workshop participants should read the following:
 
 multi_comp.pdf, and coda_seq.pdf: brief introductions to the problem from different perspectives
 make_interpret_biplot: a simple biplot with random data
-first_biplot.pdf: exploratory data analysis using compositional biplots and outlier detection and removal
+first_biplot.pdf: exploratory data analysis using compositional biplots and outlier detection and removal of the example dataset
 first_comparison.pdf: finding maximally different genes using ALDEx2
 first_association.pdf: finding maximally associated genes using propr
