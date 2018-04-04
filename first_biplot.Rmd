@@ -2,7 +2,7 @@
 title: "First biplot"
 author: "gg"
 date: '`r format(Sys.time(), "%d %B, %Y")`'
-bibliography: ~/Library/texmf/bibtex/bib/bibdesk_refs.bib
+bibliography: /Users/ggloor/Library/texmf/bibtex/bib/bibdesk_refs.bib
 fig_caption: true
 output:
     pdf_document:
@@ -12,9 +12,9 @@ output:
 To run this file:
 Rscript -e "rmarkdown::render('first_biplot.Rmd')"
 
-We will use as an example the HMP [@Proctor:2011] oral microbiome dataset and compare the attached keratinized gingiva and the supra-gingival plaque. For comparison, the sub and supra-gingival samples are compared as well. These are adjacent, in the mouth but the former pair have separable microbiome compositions, and the latter pair has few if any real differences. These data have been filtered to include only those OTUs that are present with a mean count of at least 0.1 across all samples.
+We will use as an example a transcriptome dataset [@\Schurch:2016aa;@Gierlinski:2015aa] containing 96 samples, 48 each from wt and SNF2 knockout strain These data have been filtered to include only those OTUs that are present with a mean count of at least 0.1 across all samples.
 
-The compositional biplot is the first exploratory data analysis tool that should be used whenever exploring a microbiome dataset. It shows, in one plot, the essences of your results. Do my samples separate into groups? what taxa or groups of taxa are driving this separation? what taxa are irrelevant to the analysis?
+The compositional biplot is the first exploratory data analysis tool that should be used whenever exploring a  dataset. It shows, in one plot, the essences of your results. Do my samples separate into groups? features are driving this separation? what features are irrelevant to the analysis?
 
 Compositional biplots appear to be complex and intimidating, but with a little patience and practice they are easily interpretable [@aitchison2002biplots]. They are based on the variance of the ratios of the parts, and are substantially more informative that the commonly used PCoA plots that are driven largely by abundance [@Gorvitovskaia:2016aa].
 
