@@ -1,0 +1,126 @@
+---
+title: "CoDa HTS Workshop Proposal"
+author: "Greg Gloor"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+geometry: margin=2cm
+bibliography: /Users/ggloor/Library/texmf/bibtex/bib/bibdesk_refs.bib
+csl: /Users/ggloor/Documents/0_git/csl_styles/frontiers.csl
+output:
+    pdf_document:
+        keep_tex: true
+        fig_caption: true
+        toc: true
+        toc_depth: 3
+        includes:
+            in_header: /Users/ggloor/Documents/0_git/templates/header.tex
+        pandoc_args: [
+            "-V", "classoption=twocolumn"
+        ]
+---
+
+## Analyzing data as compositions
+
+Website: https://github.com/ggloor/CoDa_microbiome_tutorial. This will serve as the central repository for the demonstrated tools and workflows. The repository will be set as release 2.0 at the end of the workshop so that participants will have a permanent public record of what was covered.
+
+We have adapted and developed tools and protocols for the analysis of HTS as compositional count data [@fernandes:2013;@fernandes:2014;@Quinn206425;@erb:2016]. Analyses conducted under this paradigm are reproducible and robust, and allow conclusions about the relative relationships between features (genes, OTUs, etc) in the underlying environment [@bian:2017;@gloorFrontiers:2017].
+
+It is possible to replace almost all steps in traditional RNA-seq, metagenomics or 16S rRNA gene sequencing analysis with compositionally appropriate methods [@gloorFrontiers:2017] that are robust to data manipulations and that provide reproducible insights into the underlying biology and composition of the system.
+
+## Objectives and outcomes
+
+The workshop will enable participants to:
+
+1. be able to identify when biological datasets are compositional, and understand the root problems  that cause problems when interrogating compositional datasets.
+
+2. understand why HTS data should be analyzed in a compositionally-appropriate framework.
+
+3. know how to install, use and interpret the output from the basic HTS compositional toolkit that consists of compositional biplots, the `propr R` package and the `ALDEx2 R` package.
+
+4. have a frame of reference for more complex compositional tools such as `philr` and concepts such as b-association and balance dendrograms.
+
+
+## Outline
+
+The workshop will be delivered as mixed didactic and participation sessions, with about a 1:4 mixture. Each session will be introduced by a short didactic introduction and demonstration. The remainder of the session will be hands-on learning exercises in the `R` programming environment.
+
+We will demonstrate a test dataset from [@]Schurch:2016aa;@Gierlinski:2015aa] the lab of Dr. Geoffrey Barton that examined the effect of a SNF2 gene knockout \emph{Saccharomyces cervisiae} transcription. This dataset is nearly ideal and simple to understand. However, participants are invited (expected) to bring their own dataset in the form of a count table with associated metadata for examination.
+
+The outline of this 1-day workshop is:
+
+### 9-9:45 - Introduction (Gloor, didactic lecture)
+
+- demonstrate and understand the geometry of high throughput sequencing data and how this constrains the analyses
+    - demonstrate the pathologies associated with HTS data analyzed using standard methods
+    - enable participants to understand why and when the usual methods of analysis are likely to be misleading
+    - understand the importance of subcompositional coherence and subcompositional dominance, and how these concepts lead to robust analyses
+
+### 10-10:45 - Probabilities and ratio transformations (Gloor, hands on)
+
+- provide an overview of sequencing as a probabilistic process, and the manipulation of probability vectors using compositional data methods
+    - how to generate probability distributions from count data using ALDEx2
+    - how to generate and interpret compositionally appropriate data transformations
+    - zero replacement strategies for sparse data with the zCompositions R package
+
+### 11-11:45 - Dimension reduction, outlier identification and clustering (Gloor, hands on)
+
+- demonstrate dimension reduction of compositional data
+    - the production and interpretation of a compositional PCA biplot
+    - identifying outlier samples
+    - learn how to conduct and interpret clustering and discriminate analysis in compositional data
+    - fuzzy clustering
+
+### 12-1 lunch break
+
+### 1-1:20 - Correlation and compositional association (Erb)
+- demonstrate compositionally appropriate identification of correlated (compositionally associated) features using the `propr R` package [@Quinn:2017]
+    - an introduction to compositional association
+
+2:30-3:15 - Differential abundance with ALDEx2 (Gloor)
+
+- demonstrate compositionally appropriate identification of differentially relatively abundant features using the `ALDEx2 R` package
+	- learn how to generate and interpret posterior expected values for differential relative abundance
+    - learn how to generate and use standardized effect sizes for differential relative abundance
+    - learn how to interpret effect plots as an adjunct to volcano and Bland-Altmann plots
+
+### 3:30-4:15 - Working with users' data (Gloor, Erb)
+
+- analyzing users' own data
+- troubleshooting users' own datasets
+- common problems from the participants will be highlighted and solutions demonstrated
+
+### 4:30-4:45- Wrapup (Gloor, Erb)
+
+- review of concepts and strategies
+- understand the congruence between the results obtained by the compositional biplot, compositional association and compositional differential relative abundance
+- provide guidance and sources on the proper interpretation of HTS datasets using a compositional paradigm
+
+## Requirements
+
+1. a reasonably up-to-date laptop computer with at leaset 8Gb RAM
+
+2. familiarity with scripting or programming languages, proficency in the `R` programming environment
+
+3. the current version of the `R` programming language installed
+
+4. a number of `R` packages will be used during the workshop. Participants should be familiar with installation of packages from both `Bioconductor` and `CRAN`
+
+## Intended Audience and Level
+
+The intended audience for this session is bioinformaticians or computational biologists who use high throughput sequencing with experimental designs that include tag sequencing (eg. 16S rRNA gene sequencing), metagenomics, transcriptomics or meta-transcriptomics.
+
+This is not intended to be an introduction to R for bioinformaticians: attendees should be relatively proficient with R, either using RStudio, or on the command line and should have a plain text editor available. Attendees will use R markdown documents to keep track of their work, and templates will be provided for use. Attendees will be expected to have a laptop with R installed and the following packages and their dependencies: propr (CRAN), ALDEx2 (Bioconductor), omicplotR (Bioconductor), zCompositions (CRAN). Attendees are encouraged to bring their own datasets for analysis, but should be aware that only pairwise (i.e., two condition) experiments will be demonstrated.
+
+Compositional concepts will be at an introductory-intermediate level suitable for participants of any background, but will be more intuitive to those with a grounding in probability and linear algebra.
+
+The practical aspects will be at an intermediate level, suitable for participants with pre-exisiting competency in `R`.
+
+Attendance should be capped at no more than 40 participants.
+
+
+## Organizers and Presenters
+
+Greg Gloor is a Professor of Biochemistry at The University of Western Ontario. He is one of the pioneers in using compositional data analysis to analyze HTS datasets. He is the maintainer of the `ALDEx2 R` package on Bioconductor used for differential relative abundance analysis. He has published original research, methods papers, and reviews that use compositional data analysis methods to interpret HTS datasets using transcriptome, microbiome and meta-transcriptome datasets  [@bian:2017;@gloorFrontiers:2017;@Wolfs:2016aa;@gloorAJS:2016;@Gloor:2016cjm;@gloor2016s;@gloor:effect;@Goneau:2015ab;@McMillan:2015aa;@fernandes:2014;@macklaim:2013;@fernandes:2013]. He has taught undergraduate and graduate courses in computational biology for almost two decades, and has won awards from both student groups and from faculty-wide competitions. His homepage and CV is at ggloor.github.io
+
+Ionas Erb is a PDF and Bioinformatician at the Centre for Genomic Regulation. He is an active developer of tools to determine compositional association and is a contributor to the `propr R` package on CRAN used to explore correlation in a compositionally appropriate manner. He is an advocate for and active developer of tools that for compositionally-appropriate methods to examine correlation [@Quinn206425;@Erb134536;@erb:2016]
+
+## References
