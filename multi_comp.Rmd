@@ -10,7 +10,7 @@ output:
 ---
 
 To run this file:
-Rscript -e "rmarkdown::render('Read_me_first.Rmd')"
+Rscript -e "rmarkdown::render('multi_comp.Rmd')"
 
 #Part 1: relative abundance data
 
