@@ -1,21 +1,20 @@
 ---
 title: "CoDa HTS Workshop Proposal"
 author: "Greg Gloor"
-date: "`r format(Sys.time(), '%d %B, %Y')`"
-geometry: margin=2cm
-bibliography: /Users/ggloor/Library/texmf/bibtex/bib/bibdesk_refs.bib
-csl: /Users/ggloor/Documents/0_git/csl_styles/frontiers.csl
 output:
-    pdf_document:
-        keep_tex: true
-        fig_caption: true
-        toc: true
-        toc_depth: 3
-        includes:
-            in_header: /Users/ggloor/Documents/0_git/templates/header.tex
-        pandoc_args: [
-            "-V", "classoption=twocolumn"
-        ]
+  pdf_document:
+    fig_caption: yes
+    includes:
+      in_header: /Users/ggloor/Documents/0_git/templates/header.tex
+    keep_tex: yes
+    pandoc_args:
+    - -V
+    - classoption=twocolumn
+    toc: yes
+    toc_depth: 3
+geometry: margin=2cm
+csl: /Users/ggloor/Documents/0_git/csl_styles/frontiers.csl
+bibliography: /Users/ggloor/Library/texmf/bibtex/bib/bibdesk_refs.bib
 ---
 
 ## Analyzing data as compositions
@@ -47,21 +46,24 @@ We will demonstrate a test dataset from [@]Schurch:2016aa;@Gierlinski:2015aa] th
 
 The outline of this 1-day workshop is:
 
-### 9-9:45 - Introduction (Gloor, didactic lecture)
+### Start time 9am - Introduction (Gloor, didactic lecture)
 
 - demonstrate and understand the geometry of high throughput sequencing data and how this constrains the analyses
     - demonstrate the pathologies associated with HTS data analyzed using standard methods
     - enable participants to understand why and when the usual methods of analysis are likely to be misleading
     - understand the importance of subcompositional coherence and subcompositional dominance, and how these concepts lead to robust analyses
 
-### 10-10:45 - Probabilities and ratio transformations (Gloor, hands on)
+### Start time 9:45 - Probabilities and ratio transformations (Gloor, hands on)
 
 - provide an overview of sequencing as a probabilistic process, and the manipulation of probability vectors using compositional data methods
     - how to generate probability distributions from count data using ALDEx2
     - how to generate and interpret compositionally appropriate data transformations
     - zero replacement strategies for sparse data with the zCompositions R package
+    - why count normalization is futile
 
-### 11-11:45 - Dimension reduction, outlier identification and clustering (Gloor, hands on)
+### Break 10:30
+
+### Start time 11 - Dimension reduction, outlier identification and clustering (Gloor, hands on)
 
 - demonstrate dimension reduction of compositional data
     - the production and interpretation of a compositional PCA biplot
@@ -69,30 +71,36 @@ The outline of this 1-day workshop is:
     - learn how to conduct and interpret clustering and discriminate analysis in compositional data
     - fuzzy clustering
 
-### 12-1 lunch break
 
-### 1-1:20 - Correlation and compositional association (Erb)
+### Start time 12: Correlation and compositional association (Erb)
 - demonstrate compositionally appropriate identification of correlated (compositionally associated) features using the `propr R` package [@Quinn:2017]
     - an introduction to compositional association
 
-2:30-3:15 - Differential abundance with ALDEx2 (Gloor)
+### Start time: 1 lunch break
+
+
+### Start time : 2: -  Correlation and compositional association continued (Erb)
+
+### Start time 2:30 Differential abundance with ALDEx2 (Gloor)
 
 - demonstrate compositionally appropriate identification of differentially relatively abundant features using the `ALDEx2 R` package
 	- learn how to generate and interpret posterior expected values for differential relative abundance
     - learn how to generate and use standardized effect sizes for differential relative abundance
     - learn how to interpret effect plots as an adjunct to volcano and Bland-Altmann plots
 
-### 3:30-4:15 - Working with users' data (Gloor, Erb)
+### Start time: 3:30 - Working with users' data (Gloor, Erb)
 
 - analyzing users' own data
 - troubleshooting users' own datasets
 - common problems from the participants will be highlighted and solutions demonstrated
 
-### 4:30-4:45- Wrapup (Gloor, Erb)
+### Start time: 4:30- Wrapup (Gloor, Erb)
 
 - review of concepts and strategies
 - understand the congruence between the results obtained by the compositional biplot, compositional association and compositional differential relative abundance
 - provide guidance and sources on the proper interpretation of HTS datasets using a compositional paradigm
+
+### Finish time 5 pm
 
 ## Requirements
 

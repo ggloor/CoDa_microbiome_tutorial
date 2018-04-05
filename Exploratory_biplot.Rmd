@@ -10,7 +10,7 @@ output:
 ---
 
 To run this file:
-Rscript -e "rmarkdown::render('first_biplot.Rmd')"
+Rscript -e "rmarkdown::render('Exploratory_biplot.Rmd')"
 
 We will use as an example a transcriptome dataset [@Schurch:2016aa;@Gierlinski:2015aa] containing 96 samples, 48 each from wt and SNF2 knockout strain These data have been filtered to include only those features that are present with a mean count of at least 0.1 across all samples.
 

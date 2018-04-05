@@ -1,0 +1,513 @@
+\documentclass[twocolumn]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\usepackage[margin=2cm]{geometry}
+\usepackage{hyperref}
+\hypersetup{unicode=true,
+            pdftitle={CoDa HTS Workshop Proposal},
+            pdfauthor={Greg Gloor},
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+%%% Use protect on footnotes to avoid problems with footnotes in titles
+\let\rmarkdownfootnote\footnote%
+\def\footnote{\protect\rmarkdownfootnote}
+
+%%% Change title format to be more compact
+\usepackage{titling}
+
+% Create subtitle command for use in maketitle
+\newcommand{\subtitle}[1]{
+  \posttitle{
+    \begin{center}\large#1\end{center}
+    }
+}
+
+\setlength{\droptitle}{-2em}
+  \title{CoDa HTS Workshop Proposal}
+  \pretitle{\vspace{\droptitle}\centering\huge}
+  \posttitle{\par}
+  \author{Greg Gloor}
+  \preauthor{\centering\large\emph}
+  \postauthor{\par}
+  \date{}
+  \predate{}\postdate{}
+
+\usepackage{geometry}
+\usepackage{amsmath}
+\newcommand{\ith}[1]{ #1\textsuperscript{th}\ }
+\newcommand{\vect}[1]{\vec{\textbf{#1}}}
+\setlength{\columnsep}{18pt} 
+
+\setlength\textwidth{5.5in}
+\setlength\marginparwidth{1.5in}
+
+\begin{document}
+\maketitle
+
+{
+\setcounter{tocdepth}{3}
+\tableofcontents
+}
+\hypertarget{analyzing-data-as-compositions}{%
+\subsection{Analyzing data as
+compositions}\label{analyzing-data-as-compositions}}
+
+Website: \url{https://github.com/ggloor/CoDa_microbiome_tutorial}. This
+will serve as the central repository for the demonstrated tools and
+workflows. The repository will be set as release 2.0 at the end of the
+workshop so that participants will have a permanent public record of
+what was covered.
+
+We have adapted and developed tools and protocols for the analysis of
+HTS as compositional count data (Erb and Notredame, 2016; Fernandes et
+al., 2013, 2014; Quinn et al., 2017a). Analyses conducted under this
+paradigm are reproducible and robust, and allow conclusions about the
+relative relationships between features (genes, OTUs, etc) in the
+underlying environment (Bian et al.; Gloor et al., 2017).
+
+It is possible to replace almost all steps in traditional RNA-seq,
+metagenomics or 16S rRNA gene sequencing analysis with compositionally
+appropriate methods (Gloor et al., 2017) that are robust to data
+manipulations and that provide reproducible insights into the underlying
+biology and composition of the system.
+
+\hypertarget{objectives-and-outcomes}{%
+\subsection{Objectives and outcomes}\label{objectives-and-outcomes}}
+
+The workshop will enable participants to:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  be able to identify when biological datasets are compositional, and
+  understand the root problems that cause problems when interrogating
+  compositional datasets.
+\item
+  understand why HTS data should be analyzed in a
+  compositionally-appropriate framework.
+\item
+  know how to install, use and interpret the output from the basic HTS
+  compositional toolkit that consists of compositional biplots, the
+  \texttt{propr\ R} package and the \texttt{ALDEx2\ R} package.
+\item
+  have a frame of reference for more complex compositional tools such as
+  \texttt{philr} and concepts such as b-association and balance
+  dendrograms.
+\end{enumerate}
+
+\hypertarget{outline}{%
+\subsection{Outline}\label{outline}}
+
+The workshop will be delivered as mixed didactic and participation
+sessions, with about a 1:4 mixture. Each session will be introduced by a
+short didactic introduction and demonstration. The remainder of the
+session will be hands-on learning exercises in the \texttt{R}
+programming environment.
+
+We will demonstrate a test dataset from
+{[}@{]}Schurch:\href{mailto:2016aa;@Gierlinski}{\nolinkurl{2016aa;@Gierlinski}}:2015aa{]}
+the lab of Dr.~Geoffrey Barton that examined the effect of a SNF2 gene
+knockout \emph{Saccharomyces cervisiae} transcription. This dataset is
+nearly ideal and simple to understand. However, participants are invited
+(expected) to bring their own dataset in the form of a count table with
+associated metadata for examination.
+
+The outline of this 1-day workshop is:
+
+\hypertarget{start-time-9am---introduction-gloor-didactic-lecture}{%
+\subsubsection{Start time 9am - Introduction (Gloor, didactic
+lecture)}\label{start-time-9am---introduction-gloor-didactic-lecture}}
+
+\begin{itemize}
+\tightlist
+\item
+  demonstrate and understand the geometry of high throughput sequencing
+  data and how this constrains the analyses
+
+  \begin{itemize}
+  \tightlist
+  \item
+    demonstrate the pathologies associated with HTS data analyzed using
+    standard methods
+  \item
+    enable participants to understand why and when the usual methods of
+    analysis are likely to be misleading
+  \item
+    understand the importance of subcompositional coherence and
+    subcompositional dominance, and how these concepts lead to robust
+    analyses
+  \end{itemize}
+\end{itemize}
+
+\hypertarget{start-time-945---probabilities-and-ratio-transformations-gloor-hands-on}{%
+\subsubsection{Start time 9:45 - Probabilities and ratio transformations
+(Gloor, hands
+on)}\label{start-time-945---probabilities-and-ratio-transformations-gloor-hands-on}}
+
+\begin{itemize}
+\tightlist
+\item
+  provide an overview of sequencing as a probabilistic process, and the
+  manipulation of probability vectors using compositional data methods
+
+  \begin{itemize}
+  \tightlist
+  \item
+    how to generate probability distributions from count data using
+    ALDEx2
+  \item
+    how to generate and interpret compositionally appropriate data
+    transformations
+  \item
+    zero replacement strategies for sparse data with the zCompositions R
+    package
+  \item
+    why count normalization is futile
+  \end{itemize}
+\end{itemize}
+
+\hypertarget{break-1030}{%
+\subsubsection{Break 10:30}\label{break-1030}}
+
+\hypertarget{start-time-11---dimension-reduction-outlier-identification-and-clustering-gloor-hands-on}{%
+\subsubsection{Start time 11 - Dimension reduction, outlier
+identification and clustering (Gloor, hands
+on)}\label{start-time-11---dimension-reduction-outlier-identification-and-clustering-gloor-hands-on}}
+
+\begin{itemize}
+\tightlist
+\item
+  demonstrate dimension reduction of compositional data
+
+  \begin{itemize}
+  \tightlist
+  \item
+    the production and interpretation of a compositional PCA biplot
+  \item
+    identifying outlier samples
+  \item
+    learn how to conduct and interpret clustering and discriminate
+    analysis in compositional data
+  \item
+    fuzzy clustering
+  \end{itemize}
+\end{itemize}
+
+\hypertarget{start-time-12-correlation-and-compositional-association-erb}{%
+\subsubsection{Start time 12: Correlation and compositional association
+(Erb)}\label{start-time-12-correlation-and-compositional-association-erb}}
+
+\begin{itemize}
+\tightlist
+\item
+  demonstrate compositionally appropriate identification of correlated
+  (compositionally associated) features using the \texttt{propr\ R}
+  package (Quinn et al., 2017b)
+
+  \begin{itemize}
+  \tightlist
+  \item
+    an introduction to compositional association
+  \end{itemize}
+\end{itemize}
+
+\hypertarget{start-time-1-lunch-break}{%
+\subsubsection{Start time: 1 lunch
+break}\label{start-time-1-lunch-break}}
+
+\hypertarget{start-time-2---correlation-and-compositional-association-continued-erb}{%
+\subsubsection{Start time : 2: - Correlation and compositional
+association continued
+(Erb)}\label{start-time-2---correlation-and-compositional-association-continued-erb}}
+
+\hypertarget{start-time-230-differential-abundance-with-aldex2-gloor}{%
+\subsubsection{Start time 2:30 Differential abundance with ALDEx2
+(Gloor)}\label{start-time-230-differential-abundance-with-aldex2-gloor}}
+
+\begin{itemize}
+\tightlist
+\item
+  demonstrate compositionally appropriate identification of
+  differentially relatively abundant features using the
+  \texttt{ALDEx2\ R} package
+
+  \begin{itemize}
+  \tightlist
+  \item
+    learn how to generate and interpret posterior expected values for
+    differential relative abundance
+  \item
+    learn how to generate and use standardized effect sizes for
+    differential relative abundance
+  \item
+    learn how to interpret effect plots as an adjunct to volcano and
+    Bland-Altmann plots
+  \end{itemize}
+\end{itemize}
+
+\hypertarget{start-time-330---working-with-users-data-gloor-erb}{%
+\subsubsection{Start time: 3:30 - Working with users' data (Gloor,
+Erb)}\label{start-time-330---working-with-users-data-gloor-erb}}
+
+\begin{itemize}
+\tightlist
+\item
+  analyzing users' own data
+\item
+  troubleshooting users' own datasets
+\item
+  common problems from the participants will be highlighted and
+  solutions demonstrated
+\end{itemize}
+
+\hypertarget{start-time-430--wrapup-gloor-erb}{%
+\subsubsection{Start time: 4:30- Wrapup (Gloor,
+Erb)}\label{start-time-430--wrapup-gloor-erb}}
+
+\begin{itemize}
+\tightlist
+\item
+  review of concepts and strategies
+\item
+  understand the congruence between the results obtained by the
+  compositional biplot, compositional association and compositional
+  differential relative abundance
+\item
+  provide guidance and sources on the proper interpretation of HTS
+  datasets using a compositional paradigm
+\end{itemize}
+
+\hypertarget{finish-time-5-pm}{%
+\subsubsection{Finish time 5 pm}\label{finish-time-5-pm}}
+
+\hypertarget{requirements}{%
+\subsection{Requirements}\label{requirements}}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  a reasonably up-to-date laptop computer with at leaset 8Gb RAM
+\item
+  familiarity with scripting or programming languages, proficency in the
+  \texttt{R} programming environment
+\item
+  the current version of the \texttt{R} programming language installed
+\item
+  a number of \texttt{R} packages will be used during the workshop.
+  Participants should be familiar with installation of packages from
+  both \texttt{Bioconductor} and \texttt{CRAN}
+\end{enumerate}
+
+\hypertarget{intended-audience-and-level}{%
+\subsection{Intended Audience and
+Level}\label{intended-audience-and-level}}
+
+The intended audience for this session is bioinformaticians or
+computational biologists who use high throughput sequencing with
+experimental designs that include tag sequencing (eg. 16S rRNA gene
+sequencing), metagenomics, transcriptomics or meta-transcriptomics.
+
+This is not intended to be an introduction to R for bioinformaticians:
+attendees should be relatively proficient with R, either using RStudio,
+or on the command line and should have a plain text editor available.
+Attendees will use R markdown documents to keep track of their work, and
+templates will be provided for use. Attendees will be expected to have a
+laptop with R installed and the following packages and their
+dependencies: propr (CRAN), ALDEx2 (Bioconductor), omicplotR
+(Bioconductor), zCompositions (CRAN). Attendees are encouraged to bring
+their own datasets for analysis, but should be aware that only pairwise
+(i.e., two condition) experiments will be demonstrated.
+
+Compositional concepts will be at an introductory-intermediate level
+suitable for participants of any background, but will be more intuitive
+to those with a grounding in probability and linear algebra.
+
+The practical aspects will be at an intermediate level, suitable for
+participants with pre-exisiting competency in \texttt{R}.
+
+Attendance should be capped at no more than 40 participants.
+
+\hypertarget{organizers-and-presenters}{%
+\subsection{Organizers and Presenters}\label{organizers-and-presenters}}
+
+Greg Gloor is a Professor of Biochemistry at The University of Western
+Ontario. He is one of the pioneers in using compositional data analysis
+to analyze HTS datasets. He is the maintainer of the \texttt{ALDEx2\ R}
+package on Bioconductor used for differential relative abundance
+analysis. He has published original research, methods papers, and
+reviews that use compositional data analysis methods to interpret HTS
+datasets using transcriptome, microbiome and meta-transcriptome datasets
+(Bian et al.; Fernandes et al., 2013, 2014; Gloor et al., 2016a, 2017,
+2016b, 2016c; Gloor and Reid, 2016; Goneau et al., 2015; Macklaim et
+al., 2013; McMillan et al., 2015; Wolfs et al., 2016). He has taught
+undergraduate and graduate courses in computational biology for almost
+two decades, and has won awards from both student groups and from
+faculty-wide competitions. His homepage and CV is at ggloor.github.io
+
+Ionas Erb is a PDF and Bioinformatician at the Centre for Genomic
+Regulation. He is an active developer of tools to determine
+compositional association and is a contributor to the \texttt{propr\ R}
+package on CRAN used to explore correlation in a compositionally
+appropriate manner. He is an advocate for and active developer of tools
+that for compositionally-appropriate methods to examine correlation (Erb
+and Notredame, 2016; Erb et al., 2017; Quinn et al., 2017a)
+
+\hypertarget{references}{%
+\subsection*{References}\label{references}}
+\addcontentsline{toc}{subsection}{References}
+
+\hypertarget{refs}{}
+\leavevmode\hypertarget{ref-bian:2017}{}%
+Bian, G., Gloor, G. B., Gong, A., Jia, C., Zhang, W., Hu, J., et al. The
+gut microbiota of healthy aged chinese is similar to that of the healthy
+young. \emph{mSphere} 2, e00327--17.
+doi:\href{https://doi.org/10.1128/mSphere.00327-17}{10.1128/mSphere.00327-17}.
+
+\leavevmode\hypertarget{ref-erb:2016}{}%
+Erb, I., and Notredame, C. (2016). How should we measure proportionality
+on relative gene expression data? \emph{Theory in Biosciences} 135,
+21--36.
+
+\leavevmode\hypertarget{ref-Erb134536}{}%
+Erb, I., Quinn, T., Lovell, D., and Notredame, C. (2017). Differential
+proportionality - a normalization-free approach to differential gene
+expression. \emph{bioRxiv}.
+doi:\href{https://doi.org/10.1101/134536}{10.1101/134536}.
+
+\leavevmode\hypertarget{ref-fernandes:2013}{}%
+Fernandes, A. D., Macklaim, J. M., Linn, T. G., Reid, G., and Gloor, G.
+B. (2013). ANOVA-like differential expression (aldex) analysis for mixed
+population rna-seq. \emph{PLoS One} 8, e67019.
+doi:\href{https://doi.org/10.1371/journal.pone.0067019}{10.1371/journal.pone.0067019}.
+
+\leavevmode\hypertarget{ref-fernandes:2014}{}%
+Fernandes, A. D., Reid, J. N., Macklaim, J. M., McMurrough, T. A.,
+Edgell, D. R., and Gloor, G. B. (2014). Unifying the analysis of
+high-throughput sequencing datasets: Characterizing RNA-seq, 16S rRNA
+gene sequencing and selective growth experiments by compositional data
+analysis. \emph{Microbiome} 2, 15.1--15.13.
+doi:\href{https://doi.org/10.1186/2049-2618-2-15}{10.1186/2049-2618-2-15}.
+
+\leavevmode\hypertarget{ref-gloor:effect}{}%
+Gloor, G. B., Macklaim, J. M., and Fernandes, A. D. (2016a). Displaying
+variation in large datasets: Plotting a visual summary of effect sizes.
+\emph{Journal of Computational and Graphical Statistics} 25, 971--979.
+doi:\href{https://doi.org/10.1080/10618600.2015.1131161}{10.1080/10618600.2015.1131161}.
+
+\leavevmode\hypertarget{ref-gloorFrontiers:2017}{}%
+Gloor, G. B., Macklaim, J. M., Pawlowsky-Glahn, V., and Egozcue, J. J.
+(2017). Microbiome datasets are compositional: And this is not optional.
+\emph{Frontiers in Microbiology} 8, 2224.
+doi:\href{https://doi.org/10.3389/fmicb.2017.02224}{10.3389/fmicb.2017.02224}.
+
+\leavevmode\hypertarget{ref-gloorAJS:2016}{}%
+Gloor, G. B., Macklaim, J. M., Vu, M., and Fernandes, A. D. (2016b).
+Compositional uncertainty should not be ignored in high-throughput
+sequencing data analysis. \emph{Austrian Journal of Statistics} 45,
+73--87.
+doi:\href{https://doi.org/doi:10.17713/ajs.v45i4.122}{doi:10.17713/ajs.v45i4.122}.
+
+\leavevmode\hypertarget{ref-Gloor:2016cjm}{}%
+Gloor, G. B., and Reid, G. (2016). Compositional analysis: A valid
+approach to analyze microbiome high-throughput sequencing data.
+\emph{Can J Microbiol} 62, 692--703.
+doi:\href{https://doi.org/10.1139/cjm-2015-0821}{10.1139/cjm-2015-0821}.
+
+\leavevmode\hypertarget{ref-gloor2016s}{}%
+Gloor, G. B., Wu, J. R., Pawlowsky-Glahn, V., and Egozcue, J. J.
+(2016c). It's all relative: Analyzing microbiome data as compositions.
+\emph{Ann Epidemiol} 26, 322--9.
+doi:\href{https://doi.org/10.1016/j.annepidem.2016.03.003}{10.1016/j.annepidem.2016.03.003}.
+
+\leavevmode\hypertarget{ref-Goneau:2015ab}{}%
+Goneau, L. W., Hannan, T. J., MacPhee, R. A., Schwartz, D. J., Macklaim,
+J. M., Gloor, G. B., et al. (2015). Subinhibitory antibiotic therapy
+alters recurrent urinary tract infection pathogenesis through modulation
+of bacterial virulence and host immunity. \emph{MBio} 6.
+doi:\href{https://doi.org/10.1128/mBio.00356-15}{10.1128/mBio.00356-15}.
+
+\leavevmode\hypertarget{ref-macklaim:2013}{}%
+Macklaim, M. J., Fernandes, D. A., Di Bella, M. J., Hammond, J.-A.,
+Reid, G., and Gloor, G. B. (2013). Comparative meta-RNA-seq of the
+vaginal microbiota and differential expression by \emph{Lactobacillus
+iners} in health and dysbiosis. \emph{Microbiome} 1, 15.
+doi:\href{https://doi.org/doi:\%2010.1186/2049-2618-1-12}{doi: 10.1186/2049-2618-1-12}.
+
+\leavevmode\hypertarget{ref-McMillan:2015aa}{}%
+McMillan, A., Rulisa, S., Sumarah, M., Macklaim, J. M., Renaud, J.,
+Bisanz, J. E., et al. (2015). A multi-platform metabolomics approach
+identifies highly specific biomarkers of bacterial diversity in the
+vagina of pregnant and non-pregnant women. \emph{Sci Rep} 5, 14174.
+doi:\href{https://doi.org/10.1038/srep14174}{10.1038/srep14174}.
+
+\leavevmode\hypertarget{ref-Quinn206425}{}%
+Quinn, T. P., Erb, I., Richardson, M. F., and Crowley, T. M. (2017a).
+Understanding sequencing data as compositions: An outlook and review.
+\emph{bioRxiv}.
+doi:\href{https://doi.org/10.1101/206425}{10.1101/206425}.
+
+\leavevmode\hypertarget{ref-Quinn:2017}{}%
+Quinn, T., Richardson, M. F., Lovell, D., and Crowley, T. (2017b).
+Propr: An R-package for identifying proportionally abundant features
+using compositional data analysis. \emph{bioRxiv}.
+doi:\href{https://doi.org/10.1101/104935}{10.1101/104935}.
+
+\leavevmode\hypertarget{ref-Wolfs:2016aa}{}%
+Wolfs, J. M., Hamilton, T. A., Lant, J. T., Laforet, M., Zhang, J.,
+Salemi, L. M., et al. (2016). Biasing genome-editing events toward
+precise length deletions with an rna-guided tevcas9 dual nuclease.
+\emph{Proc Natl Acad Sci U S A}.
+doi:\href{https://doi.org/10.1073/pnas.1616343114}{10.1073/pnas.1616343114}.
+
+
+\end{document}
