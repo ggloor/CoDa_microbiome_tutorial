@@ -1,0 +1,201 @@
+---
+title: "Proportionality and differential proportionality using the propr R package"
+author: "Ionas Erb"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+## Introduction
+
+In this document, we will introduce two concepts of Compositional Data Analysis that are useful for RNA-seq analysis: Proportionality and differential propotionality. While the former can be seen as a substitute for correlation, the latter can be uderstood as a differential expression of gene ratios. Both try to circumvent the problems introduced by the constant-sum constraint imposed on the data by the sequencing procedure without making normalization assumptions. As a work-through example, we are using the SNF2-knockout yeast data set from the Barton group (Gierlinski et al. 2015). We can load it by
+```{r}
+ma=read.table("barton_agg.tsv",row.names=1,header=TRUE)
+dim(ma)
+```
+The rows of the matrix are $N=96$ observations of the 6349 genes in the columns. The observations fall in two groups, the SNF2-knockout and the wildtype. Although we will need it only in the final section of this document, let us define the group variable already here:
+```{r}
+gr=c(rep(0,48),rep(1,48))
+```
+Let us now remove some genes that have on average less than one count per sample.  
+```{r}
+M=ma[,which(apply(ma,2,sum)>95)]
+dim(M)
+```
+This leaves us with $D=5958$ genes, some of which will have zero entries somewhere. Note that the statistics that we present below can be modified to explicitly deal with zeros (and much of this is already implemented in propr), but we will not have time to cover this topic here.
+  
+## Proportionality
+
+Correlation between variables cannot be defined consistently on compositional data, but positive correlation can be quantified using the log-ratio variance (LRV), see (Aitchsion 1986). 
+$$\textrm{LRV}(x,y) = \textrm{var}\left(\log\frac{x_1}{y_1},\dots,\log\frac{x_N}{y_N}\right)$$
+
+Since ratios are taken within each single sample, any (normalization) factor constraining the sample to a given sum will cancel out. The log is needed to make the sample-wise ratios symmetric with their reciprocal values. Now the variance of the sample-wise log-ratios will be close to zero for variables changing in about the same way along the samples. Such genes $x$, $y$ are *proportional*, i.e. $y=$const.$x$, because a vanishing LRV implies $y/x=$const. It is equivalent to saying that genes have a linear relationship without $y$-intercept. Let us look at two arbitrary genes now: 
+```{r}
+plot(M[,1],M[,2],xlim=c(0,range(M[,1])[2]),ylim=c(0,range(M[,2])[2]),xlab=colnames(M)[1],ylab=colnames(M)[2])
+```
+
+Scatter plots like this one are intrinsically problematic for compositional data. This is because they assume that the values of the variables displayed on the axes have an absolute meaning. Compositional variables are parts of a whole and should be understood in relationship to other variables only. This implies that the total sum each sample is adding to should not play a role in the analysis. To make this clearer, let us multiply each sample by some random prefactors between 0 and 1:
+```{r}
+set.seed(123)
+fac=sample(seq(0.01,1,0.01),dim(M)[1])
+plot(fac*M[,1],fac*M[,2],xlim=c(0,range(fac*M[,1])[2]),ylim=c(0,range(fac*M[,2])[2]),xlab=colnames(M)[1],ylab=colnames(M)[2])
+```
+
+As we can see already in the plots, the "crude" correlation between the genes changes. The Pearson correlation increases a lot.
+```{r}
+cor(M[,1],M[,2])
+cor(fac*M[,1],fac*M[,2])
+```
+
+Now compare with this ratio representation and the unchanged variance of the log-ratio:
+```{r}
+plot(c(1:96),M[,1]/M[,2],log="y",xlab="sample",ylab=paste(colnames(M)[1],colnames(M)[2],sep="/"))
+var(log(M[,1]/M[,2]))
+var((log(fac*M[,1]/(fac*M[,2]))))
+```
+
+Is 0.26 a small LRV? Unlike correlation, LRV has no natural scale. We could argue that a value of 0.26 is more impressive for genes that vary a lot by themselves than for those that change little across samples anyway. This idea has been introduced by (Lovell et al. 2015). In their paper, the authors set out to scale LRV by the variance of one or both of the individual genes. Note, however, that the variance of individual genes is problematic because it presupposes that we can have a meaningful comparison between samples based on raw counts. Following compositional data-analysis principles, inter-sample comparisons can only be done for ratios. The individual gene variances that are used for the scaling of LRV have themselves to be based on ratios then. This can be done with a reference variable $z$ (in form of an individual gene or the geometric mean over all genes):
+
+$$\rho(x,y)=\frac{2~\textrm{cov}(\log(x/z),\log(y/z))}{\textrm{var}(\log(x/z))+\textrm{var}(\log(y/z))}=1-\frac{\textrm{LRV}(x,y)}{\textrm{LRV}(x,z)+\textrm{LRV}(y,z)}$$
+
+The first equality shows that $\rho$ is similar to a correlation between the logs, only that the geometric mean of the variances is replaced by the arithmetic mean. $\rho$ punishes both low correlation (between the logs) and a finite $y$-intercept of the scatter. Like normal correlation, it has the nice property that it falls between -1 and 1, and a value of 1 indicates full proportionality (-1 indicates reciprocality). To return to the example above, and taking as a reference the gene *Rev7* (YIL139C), we can inspect the scaled version of the scatter plot and the proportionality coefficient $\rho$:
+```{r}
+z=M[,"YIL139C"]
+plot(M[,1]/z,M[,2]/z,xlim=c(0,range(M[,1]/z)[2]),ylim=c(0,range(M[,2]/z)[2]),xlab=paste(colnames(M)[1],"REV7",sep="/"),ylab=paste(colnames(M)[2],"REV7",sep="/"))
+abline(a=0,b=sqrt(var(M[,2]/z)/var(M[,1]/z)),col="red")
+1-var(log(M[,1]/M[,2]))/(var(log(M[,1]/z))+var(log(M[,2]/z)))
+```
+The red line indicates the theoretical relationship the genes should follow if they were proportional. However, we can see a rather noisy cloud that is shifted with respect to the zero-intercept line, indicating that these genes cannot be proportional. This is confirmed by the rather modest coefficient $\rho$. Let us now change the reference to the geometric mean of the genes (that do not have zero-entries):
+```{r}
+g=exp(apply(log(M[,which(apply(M,2,min)>0)]),1,mean))
+plot(M[,1]/g,M[,2]/g,xlim=c(0,range(M[,1]/g)[2]),ylim=c(0,range(M[,2]/g)[2]),xlab=paste(colnames(M)[1],"gMean",sep="/"),ylab=paste(colnames(M)[2],"gMean",sep="/"))
+abline(a=0,b=sqrt(var(M[,2]/g)/var(M[,1]/g)),col="red")
+1-var(log(M[,1]/M[,2]))/(var(log(M[,1]/g))+var(log(M[,2]/g)))
+```
+Clearly, here the result of $\rho$ depends a lot on the reference used. How this can introduce spurious results was worked out in detail in (Erb & Notredame 2016). However, it was found empirically that spurious results seem to affect mainly sensitivity, not specificity (Quinn et al. 2017). Let us now use the propr package to calculate both versions of $\rho$ on our entire data set:
+```{r}
+library(propr)
+rho.g=perb(M)
+rho.z=perb(M,ivar=which(colnames(M)=="YIL139C"))
+str(rho.g)
+```
+The object that is created by proper contains, among other things, an object @matrix of the $\rho$ coefficients. We can fill the @pairs object with pairs we are interested in using a cutoff on $\rho$. Let us first look at all of them using a histogram.
+```{r}
+rho.g=rho.g[">",-1.1]
+hist(rho.g@matrix[rho.g@pairs],main="Rho with geometric mean reference")
+```
+
+Let us compare this with the $\rho$ using our reference gene:
+```{r}
+rho.z=rho.z[">",-1.1]
+hist(rho.z@matrix[rho.z@pairs],main="Rho with Rev7 reference")
+```
+
+While the geometric mean forces the distribution to be symmetric, our reference gene might approximate better an unchanged reference and we could gain some sensitivity using it. Let us now see if the pairs with coeffcients close to one are the same for both coefficients:
+```{r}
+rho.z@pairs=numeric(0)
+rho.z=rho.z[">",0.98]
+rho.g@pairs=numeric(0)
+rho.g=rho.g[">",0.98]
+length(rho.z@pairs)
+length(rho.g@pairs)
+length(intersect(rho.g@pairs,rho.z@pairs))
+```
+It appears that for this cut-off of 0.98 we get some 200 pairs more using the *Rev7* reference, but fortunately, the rest of the pairs is in perfect agreement. Let us now recover the gene indices from the consensus pairs and put them into a data frame:
+```{r}
+cind=round(dim(M)[2]*(rho.g@pairs/dim(M)[2]-floor(rho.g@pairs/dim(M)[2])))
+rind=round(floor(rho.g@pairs/dim(M)[2])+1)
+ppairs=as.data.frame(cbind(sort(cind),rind[order(cind)]))
+```
+
+We can now use the igraph package to gain an idea about the connectivity:
+```{r}
+library(igraph)
+graph=graph_from_data_frame(ppairs,directed=FALSE)
+set.seed(123)
+plot(graph,vertex.size=2,vertex.label=NA)
+sort(degree(graph),decreasing=TRUE)[1:32]
+```
+
+Instead of exploring these modules, we will now move on to the section about differential proportionality. Since the calculations for this take a few minutes, let us prepare the object already (here it is commented out for rendering the markdown document quickly):
+```{r}
+#res=propd(M,group=gr)
+```
+
+
+
+## Differential proportionality
+
+
+Differential proportionality as we present it here is a differential expression analysis of gene ratios (Erb et al. 2017). What does it mean for a ratio to be differentially expressed? Let us look at the following example:
+```{r}
+plot (M[,101],M[,80],col=gr+2,xlab=colnames(M)[101],ylab=colnames(M)[80])
+abline(a=0,b=sqrt(var(M[1:48,80])/var(M[1:48,101])),col="red")
+abline(a=0,b=sqrt(var(M[49:96,80])/var(M[49:96,101])),col="green")
+```
+
+We can see that the slope of the scatter is condition-specific. The genes are clearly not proportional, but they appear to be proportional within each of the conditions. The colored lines indicate the theoretical relationship they would follow if the genes were perfectly proportional within each condition. As we can see, the red line fits pretty well, while the green line is a bit off, indicating that proportionality is only approximately true here.
+
+A plot showing the ratios on a log scale makes the equivalence with differential expression quite clear. Instead of a log-fold change, we have a log-ratio change. The vertical lines indicate the log-ratio means in both groups. 
+```{r}
+plot (c(1:96),M[,101]/M[,80],col=gr+2,log="y",xlab="sample",ylab=paste(colnames(M)[101],colnames(M)[80],sep="/"))
+abline(h=exp(mean(log(M[1:48,101]/M[1:48,80]))),col="red")
+abline(h=exp(mean(log(M[49:96,101]/M[49:96,80]))),col="green")
+```
+
+The measure for finding such gene pairs in our data set (where $K=48$) is this: 
+
+$$\vartheta(x,y)=\frac{(K-1)~\textrm{LRV}_{1,...,K}(x,y)+(N-K-1)~\textrm{LRV}_{K+1,...,N}(x,y)}{(N-1)~\textrm{LRV}_{1,...,N}(x,y)}$$
+
+The LRV indices are meant to indicate that LRV is only evaluated on the respective subset. The LRV in the denominator is of course the one we were using before, and the indices are only shown for clarity. $\vartheta$ is the ratio of within-group LRV to total LRV and thus, unlike LRV, has the nice property to fall between 0 and 1. Like LRV, it is independent of a reference, and values close to zero indicate the interesting cases. It can be derived from a decomposition of LRV into between- and within-group variance as known from analysis of variance (ANOVA). We are essentially doing a $t$-test on the ratios, only that the direction of the fold change (i.e. the log-ratio change) does not matter (because it does not matter which of the two genes is in the denominator of the ratio). The statistic is thus fully equivalent to the squared $t$-statistic (i.e. the $F$-statistic of one-way ANOVA). 
+
+Our calculations before the start of this section provided us with the res object. For the example pair shown before it contains this entry:
+```{r}
+res@theta[5030,]
+```
+
+$\vartheta$ indicates the significance of the differential proportionality, and we can associate it with a false discovery rate (FDR) using a permutation test. We will not do this here because of time constraints, but the command for 10 permutations would be this:
+```{r}
+#res=updateCutoffs(res,cutoff=seq(0.05,0.95,0.01), p=10)
+```
+
+This will populate the res@fdr object where FDRs for the specified cut-off sequence are provided. (I can assure you that for our data set even a cut-off as high as 0.95 is still highly significant). What about the effect size then? The equivalent to the log-fold change of differential expression is the log-ratio change. It is the difference of the log-ratio means (LRMs) of the two groups and can be used to calculate the between-group variance:
+
+$$(1-\vartheta(x,y))\textrm{LRV(x,y)}=\frac{K(N-K)}{N^2}(\textrm{LRM}_{1,...,K}(x,y)-\textrm{LRM}_{K+1,...,N}(x,y))^2$$
+
+The group LRMs can also be directly read off the res@theta object (see example above). Something similar to a volcano plot can now be obtained when we plot the size of the log-ratio change against theta. We are doing this here only for a subset of 100,000 pairs to speed up the plotting:
+```{r}
+set.seed(123)
+myset=sample(c(1:dim(res@theta)[1]),100000)
+plot(res@theta$theta[myset],abs(res@theta$lrm1[myset]-res@theta$lrm2[myset]),col=rgb(0.1,0.1,0.1,0.1),pch=20,xlab="theta",ylab="absolute log-ratio change")
+```
+
+There is a conspicuous set of pairs with low $\vartheta$ and high LRMs. We extract it and look at the degrees of the resulting graph nodes:
+```{r}
+pairset=which(abs(res@theta$lrm1-res@theta$lrm2)>5)
+graph=graph_from_data_frame(res@theta[pairset,1:2],directed=FALSE)
+sort(degree(graph),decreasing=TRUE)[1:10]
+length(pairset)
+colnames(res@counts)[5300]
+```
+
+The degree of the first gene has about the size of the pairset, which corresponds almost to the total number of genes. So one gene appears to be connected to all the other genes. This is the knockout gene *SNF2*, whose systematic name is YOR290C. 
+
+In our "volcano" plot we can also see that there are a number of pairs with even lower $\vartheta$ than the ones from this module. To extract the genes involved, we extract the gene indices from the res@theta object. Again, to prioritize genes, it is interesting to look at connectivity. 
+```{r}
+pairset=which(res@theta$theta<0.01)
+geneset=unique(c(res@theta[pairset,1],res@theta[pairset,2]))  
+length(geneset)
+graph=graph_from_data_frame(res@theta[pairset,1:2],directed=FALSE)
+sort(degree(graph),decreasing=TRUE)[1:10]
+set.seed(123)
+plot(graph,vertex.size=2,vertex.label=NA)
+```
+
+## References
+
+1. Gierliński, Marek et al. “Statistical Models for RNA-Seq Data Derived from a Two-Condition 48-Replicate Experiment.” Bioinformatics 31 (2015): 3625–3630.
+2. Aitchison, John (1986), The Statistical Analysis of Compositional Data, Chapman & Hall; reprinted in 2003, with additional material, by The Blackburn Press.
+3. Lovell, David, et al. "Proportionality: a valid alternative to correlation for relative data." PLoS Computational Biology 11 (2015): e1004075.
+4. Erb, Ionas & Notredame, Cedric "How should we measure proportionality on relative gene expression data?" Theory in Biosciences 135 (2016): 21–36.
+5. Quinn, Thom et al. "propr: An R-package for Identifying Proportionally Abundant Features Using Compositional Data Analysis." Scientific Reports 7 (2017): 16252.
+6. Erb, Ionas et al. "Differential proportionality – a normalization-free approach to differential gene expression." Proceedings of CoDaWork 2017, available at bioRxiv (2017): 134536
