@@ -31,7 +31,7 @@ library(zCompositions)
 library(CoDaSeq)
 
 # it is important to first filter to remove rows that are exclusively 0 values
-d.filt <- codaSeq.filter(d.agg, min.count=1, min.prop=0, samples.by.row=FALSE)
+d.filt <- d[rowSums(d.agg) > 0,]
 
 # we are using the Count Zero Multiplicative approach
 d.n0 <- cmultRepl(t(d.filt), method="CZM", label=0)
