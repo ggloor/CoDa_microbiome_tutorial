@@ -1,5 +1,5 @@
 ---
-title: "What is a 0 anyway?"
+title: "What is a 0 anyway"
 author: "gg"
 date: "`r Sys.Date()`"
 fig_caption: true
@@ -8,17 +8,14 @@ output: pdf_document
 To run this file:
 Rscript -e "rmarkdown::render('zero.Rmd')"
 
-# 0 is an observation not a ground truth
+# 0 is an observation, not a ground truth
 
 We will explore what a 0 value means in a probabilistic sense
 
+We take the dataset, which is technical replicates of the yeast dataset and compare one technical replicate with the other
+
 ```{r, echo=TRUE}
-
-# take the dataset, which is technical replicates of the
-# yeast dataset and compare one technical replicate with the
-# other
-
-d <- read.table("data/ERP004763_sample_mapping.tsv", header=T, row.names=1)
+d <- as.matrix(read.table("data/countfinal2.tsv", header=T, row.names=1))
 
 # remove 0 sum features
 d.n0 <- d[rowSums(d) > 0,]
@@ -79,14 +76,7 @@ In RNA-seq we typically do not have enough samples to have independent power for
  but we cannot estimate it in most datasets, so add a prior
 
 
- The data are probabilities scaled by the read count, then converted
- to integers by 'counting'
- if we sequenced 10 deeper, then 0 values would be converted to a
- continuum between 0 and ~10 (sampling), so what is an appropriate
- value for 0? somewhere between 0 and 1
- least likely value, over many experiments to perturb the system?
- 0.5. Not always the best, usually not the optimum, but in general
- the least wrong
+ The data are discrete probabilities of observing the feature in the DNA sequencing library scaled by the read count; converted to integers by 'counting'. If we sequenced 10X deeper, then 0 values would be converted to a integers between 0 and ~10 (sampling). If we sequenced 1000X deeper, then we would get an even better estimate of the actual underlying value for our 0s. Most of the 0s at some point will be converted to a count---so what is an appropriate value for 0? Somewhere between 0 (can never occur in the observable universe) and 1 (we always should see it) is a least likely value that, over many experiments will be least likely to perturb the system? That value is 0.5. Not always the best, usually not the optimum, but in general the least wrong.
 
  ```{r, echo=FALSE}
 
@@ -105,16 +95,36 @@ rdirichlet <- function (n, alpha)
   return(x / rowSums(x))
 }
 ```
-Lets generate 1000 random instances of the data. The maximum likelihood probability in the limit is the count divided by the sum of the sample. Since we know that a pure replicate is not identical, and differs by sampling variation we can estimate this as a multivariate Poisson process with a fixed sum: this is a Dirichlet distribution.
+
+Lets generate random instances of the data. The maximum likelihood probability is the count divided by the sum of the sample. This is a discrete probability since we are dealing with finite values.
+
+Since we know that a pure replicate is not identical and differs by sampling variation the ML estimate is strongly affected by sampling. We can convert the discrete estimate of the probability to a continuous probability by modelling as a multivariate Poisson process with a fixed sum: this is a Dirichlet distribution.
 
 Even though the E(Dir) is very close to the ML estimate, the individual Dir instances are variable. This variation is a reasonable match for the actual underlying technical variation (tails are a bit broader in general), but is reasonable.
 
-```{r, echo=T}
-d.dir <- rdirichlet(1000, d.n0[,1]+0.5)
+```{r, echo=T, fig.height=3, fig.width=7.5}
+par(mfrow=c(1,3))
+plot((d.n0[,1] + 0.2) /sum(d.n0[,1] + 0.2),
+    (d.n0[,2] + 0.2)/sum(d.n0[,2] + 0.2),
+    log="xy", xlab="P 1", ylab="P 2",
+    pch=19, col=rgb(0,0,0,0.1))
+
+
+d.dir <- rdirichlet(16, d.n0[,1]+0.5)
 ml <- (d.n0[,1]+0.5) / sum(d.n0[,1]+0.5)
 E_dir <- apply(d.dir, 2, mean)
-plot(d.dir[1,], ml, pch=19, xlab="Dir", col=rgb(1,0,0,0.1), log="xy")
-points(E_dir, ml, pch=19)
+plot(d.dir[1,], d.dir[2,], pch=19, cex=0.2,xlab="Dir 1",
+    ylab="Dir 2", col=rgb(1,0,0,0.1), log="xy")
+points(E_dir, ml, pch=19,cex=0.1, col="blue")
+
+plot((d.n0[,1] + 0.2) /sum(d.n0[,1] + 0.2),
+    (d.n0[,2] + 0.2)/sum(d.n0[,2] + 0.2),
+    log="xy", pch=19, col=rgb(0,0,0,0.1),
+    xlab="P(D) 1", ylab="P(D) 2")
+points(d.dir[1,], d.dir[2,], pch=19, cex=0.2, col=rgb(1,0,0,0.1))
+points(d.dir[1,], d.dir[3,], pch=19, cex=0.2, col=rgb(1,0,0,0.1))
+points(d.dir[1,], d.dir[4,], pch=19, cex=0.2, col=rgb(1,0,0,0.1))
+points(E_dir, ml, pch=19,cex=0.1, col="blue")
 
 ```
 The expected value of the Dir instances is close to the
