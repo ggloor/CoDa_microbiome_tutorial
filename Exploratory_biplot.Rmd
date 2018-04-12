@@ -1,5 +1,5 @@
 ---
-title: "First biplot"
+title: "Exploratory biplot"
 author: "gg"
 date: '`r format(Sys.time(), "%d %B, %Y")`'
 bibliography: /Users/ggloor/Library/texmf/bibtex/bib/bibdesk_refs.bib
@@ -20,6 +20,26 @@ The compositional biplot is the first exploratory data analysis tool that should
 
 Compositional biplots appear to be complex and intimidating, but with a little patience and practice they are easily interpretable [@aitchison2002biplots]. They are based on the variance of the ratios of the parts, and are substantially more informative that the commonly used PCoA plots that are driven largely by abundance [@Gorvitovskaia:2016aa].
 
+```{r outlier_function, echo=F}
+codaSeq.outlier <- function(x, plot.me=TRUE, col=rgb(1,0,0,0.3)){
+
+  pcx <- prcomp(x)
+  mv <- sum(pcx$sdev^2)
+
+  sample.var <-  apply(pcx$x,1,function(y){sum(y^2/mv)})
+
+  cut <- median(apply(pcx$x,1,function(x){sum(x^2/mv)})) + 2 * IQR(apply(pcx$x,1,function(x){sum(x^2/mv)}))
+
+  bad <- names(which(apply(pcx$x,1,function(x){sum(x^2/mv)}) > cut))
+  good <- names(which(apply(pcx$x,1,function(x){sum(x^2/mv)}) <= cut))
+  if(plot.me == TRUE){
+    hist(sample.var, breaks=100)
+    boxplot(sample.var, horizontal=TRUE, col=col, add=TRUE)
+    abline(v=cut, lty=2)
+  }
+  return(list(sample.var=sample.var, bad=bad, good=good) )
+}
+```
 
 ```{r biplot, echo=TRUE, results='as.is', fig.width=7, fig.height=7, error=FALSE, message=FALSE, warning=FALSE, fig.cap="The compositional biplot is the workhorse tool for CoDa. This plot summarizes the entire analysis in a qualitative manner. We can see that the op and ak samples separate very well, although the proportion of variance explained on component 1 is small. Furthermore, we can see the genus names of some of the features that are driving this divide. Finally, component 1 has substantially more variance than does componet 2, and we can explain this experiment as a simple two part comparison with the largest variance along the axis of the comparison."}
 
@@ -28,10 +48,9 @@ d.agg <- read.table("data/barton_agg.tsv", sep="\t", header=T, row.names=1)
 
 # load the library zCompositions to perform 0 replacement
 library(zCompositions)
-library(CoDaSeq)
 
 # it is important to first filter to remove rows that are exclusively 0 values
-d.filt <- d[rowSums(d.agg) > 0,]
+d.filt <- d.agg[rowSums(d.agg) > 0,]
 
 # we are using the Count Zero Multiplicative approach
 d.n0 <- cmultRepl(t(d.filt), method="CZM", label=0)
@@ -86,21 +105,22 @@ plot(pcx, main="hist")
 We can see that there are a number of samples that appear to be outlier samples. Should we include SNF2.6 in the analysis or not? One of the messages of the Barton papers [@Schurch:2016aa;@Gierlinski:2015aa] was that about 10% of samples, even carefully prepared samples can be outliers for unknown methodological reasons. We approach outliers by finding those samples that contribute more variance than expected to the variance of the group. Outliers are defined as those samples that contribute greater than the median plus twice the interquartile range of the sample variance to the total variance of the group.
 
 
-```{r outlier, message=FALSE, warning=FALSE, echo=FALSE, fig.cap='outliers', fig.height=8, fig.width=8}
-# get the outliers from each group. See codaSeq.outlier
+```{r outlier, message=FALSE, warning=FALSE, echo=FALSE, fig.cap='outliers', fig.height=4, fig.width=4}
+# get the outliers from each group. See codaSeq.outlier function
 # get WT indices
 WT <- grep("WT", rownames(d.agg))
 # subset
 WT.agg <- d.agg[WT,]
 
-# filter
-wt.gt0 <- codaSeq.filter(WT.agg, min.reads=0, min.prop=0, min.count=0, samples.by.row=TRUE)
+# filter, samples by row
+wt.gt0 <- WT.agg[,colSums(WT.agg) > 0]
 
 # estimate 0 values (zCompositions)
-wt.agg.n0 <- cmultRepl(t(wt.gt0), method="CZM", label=0)
+# samples by row
+wt.agg.n0 <- cmultRepl(wt.gt0, method="CZM", label=0)
 
 # clr transform
-wt.agg.n0.clr <- codaSeq.clr(wt.agg.n0)
+wt.agg.n0.clr <- t(apply(wt.agg.n0, 1, function(x) log(x) - mean(log(x))))
 
 # SVD
 pcx.wt  <- prcomp(wt.agg.n0.clr)
@@ -113,26 +133,29 @@ biplot(pcx.wt, var.axes=FALSE, scale=0,  cex=c(1,.05))
 # make a list of names to keep. found in $good
 WT.g <- codaSeq.outlier(wt.agg.n0.clr, plot.me=TRUE)
 
-# now do the same for SNF2
-# get SNF indices
 SNF <- grep("SNF", rownames(d.agg))
 # subset
 SNF.agg <- d.agg[SNF,]
 
-SNF.gt0 <- codaSeq.filter(SNF.agg, min.reads=0, min.prop=0, min.count=0, samples.by.row=TRUE)
+# filter, samples by row
+SNF.gt0 <- SNF.agg[,colSums(SNF.agg) > 0]
 
 # estimate 0 values (zCompositions)
-SNF.agg.n0 <- cmultRepl(t(SNF.gt0), method="CZM", label=0)
+# samples by row
+SNF.agg.n0 <- cmultRepl(SNF.gt0, method="CZM", label=0)
 
 # clr transform
-SNF.agg.n0.clr <- codaSeq.clr(SNF.agg.n0)
+SNF.agg.n0.clr <- t(apply(SNF.agg.n0, 1, function(x) log(x) - mean(log(x))))
 
+# SVD
 pcx.SNF  <- prcomp(SNF.agg.n0.clr)
 mvar.SNF.clr <- sum(pcx.SNF$sdev^2)
 
+# plot
 par(mfrow=c(1,1))
-biplot(pcx.SNF, var.axes=FALSE, scale=0, cex=c(1,.05))
+biplot(pcx.SNF, var.axes=FALSE, scale=0,  cex=c(1,.05))
 
+# make a list of names to keep. found in $good
 SNF.g <- codaSeq.outlier(SNF.agg.n0.clr, plot.me=TRUE)
 
 ```
@@ -149,30 +172,68 @@ Now we can make a biplot of only those samples that are non-outliers. We see tha
 d.good <- rbind(d.agg[SNF.g$good,],d.agg[WT.g$good,])
 
 # filter
-d.good.gt0 <- codaSeq.filter(d.good,  min.count=1, samples.by.row=TRUE)
+#d.good.gt0 <- codaSeq.filter(d.good,  min.count=1, samples.by.row=TRUE)
+d.good.gt0 <- d.good[,colSums(d.good) > 0]
 
 # estimate 0 values (zCompositions)
-d.good.agg.n0 <- cmultRepl(t(d.good.gt0), method="CZM", label=0)
+d.good.agg.n0 <- cmultRepl(d.good.gt0, method="CZM", label=0)
 
 # clr transform
-d.good.agg.n0.clr <- codaSeq.clr(d.good.agg.n0)
+d.good.agg.n0.clr <- t(apply(d.good.agg.n0, 1, function(x) log(x) - mean(log(x))))
 
 # SVD
 pcx.good  <- prcomp(d.good.agg.n0.clr)
 mvar.good <- sum(pcx.good$sdev^2)
+# get the labels for the first two components
 PC1.g <- paste("PC1: ", round(pcx.good$sdev[1]^2/sum(pcx.good$sdev^2),3), sep="")
 PC2.g <- paste("PC2: ", round(pcx.good$sdev[2]^2/sum(pcx.good$sdev^2),3), sep="")
 
 # plot and save
 par(mfrow=c(1,1))
-biplot(pcx.good, var.axes=FALSE, scale=0, cex=c(1,.5),  xlab=PC1, ylab=PC2)
+biplot(pcx.good, var.axes=FALSE, scale=0, cex=c(1,.5),  xlab=PC1.g, ylab=PC2.g)
 abline(h=0, lty=2, lwd=2, col=rgb(0,0,0,0.3))
 abline(v=0, lty=2, lwd=2, col=rgb(0,0,0,0.3))
-# get the labels for the first two components
 
-
+# optionally save
 # write.table(d.good.gt0, file="data/filtered_table.txt", sep="\t", quote=F, col.names=NA)
 ```
+\clearpage
+
+## We can also plot the biplot of the samples that were removed.
+
+We can also examine those samples that were deemed to be outliers. Here we can see that the outlier samples have the axis of the experiment on PC2, which means that there problems in the dataset that led to these samples being outliers overwhelms the actual signal in the dataset. This confirms that these samples should be removed from the dataset as they are adding either noise, or some systematic information to the dataset.
+
+```{r bad_data_pca, message=FALSE, warning=FALSE, echo=FALSE, fig.cap='outliers', fig.height=7, fig.width=7}
+
+# make a dataset of only the non-outlier samples
+d.bad <- rbind(d.agg[SNF.g$bad,],d.agg[WT.g$bad,])
+
+# filter
+d.bad.gt0 <- d.bad[,colSums(d.bad) > 0]
+
+# estimate 0 values (zCompositions)
+d.bad.agg.n0 <- cmultRepl(d.bad.gt0, method="CZM", label=0)
+
+# clr transform
+d.bad.agg.n0.clr <- t(apply(d.bad.agg.n0, 1, function(x) log(x) - mean(log(x))))
+
+# SVD
+pcx.bad  <- prcomp(d.bad.agg.n0.clr)
+mvar.bad <- sum(pcx.bad$sdev^2)
+# get the labels for the first two components
+PC1.g <- paste("PC1: ", round(pcx.bad$sdev[1]^2/sum(pcx.bad$sdev^2),3), sep="")
+PC2.g <- paste("PC2: ", round(pcx.bad$sdev[2]^2/sum(pcx.bad$sdev^2),3), sep="")
+
+# plot and save
+par(mfrow=c(1,1))
+biplot(pcx.bad, var.axes=FALSE, scale=0, cex=c(1,.5),  xlab=PC1.g, ylab=PC2.g)
+abline(h=0, lty=2, lwd=2, col=rgb(0,0,0,0.3))
+abline(v=0, lty=2, lwd=2, col=rgb(0,0,0,0.3))
+
+# optionally save
+# write.table(d.good.gt0, file="data/filtered_table.txt", sep="\t", quote=F, col.names=NA)
+```
+
 \clearpage
 
 ## Additional filtering does not change the conclusions
@@ -190,7 +251,7 @@ d.lv <- d.good[, names(nms)]
 d.lv.agg.n0 <- cmultRepl(d.lv, method="CZM", label=0)
 
 # clr transform
-d.lv.agg.n0.clr <- codaSeq.clr(d.lv.agg.n0)
+d.lv.agg.n0.clr <- t(apply(d.lv.agg.n0, 1, function(x) log(x) - mean(log(x))))
 
 # SVD
 pcx.lv  <- prcomp(d.lv.agg.n0.clr)
@@ -209,8 +270,7 @@ abline(v=0, lty=2, lwd=2, col=rgb(0,0,0,0.3))
 
 ## FUZZY CLUSTERING
 
-We can also plot the samples according to their kmeans cluster membership. For this we are using the fuzzy clustering package ppclust [@fuzzy:2018]. There is a good introduction to fuzzy clustering in  [@fernandez:2012]. Essentially, we are using a probabilistic (or possibilistic) approach to determine the number of clusters, and the cluster memberships. The vignette for this approach is at: https://cran.r-project.org/web/packages/ppclust/vignettes/fcm.html.
-
+We can plot the samples according to their kmeans cluster membership. For this we are using the fuzzy clustering package ppclust [@fuzzy:2018]. There is a good introduction to fuzzy clustering in  [@fernandez:2012]. Essentially, we are using a probabilistic (or possibilistic) approach to determine the number of clusters, and the cluster memberships. The vignette for this approach is at: https://cran.r-project.org/web/packages/ppclust/vignettes/fcm.html. As noted in the workshop, we get two clusters if we choose centers=2 or =3, but the SNF2 and WT groups split if we choose centers=4.
 
 ```{r fuzzy}
 library(ppclust)
