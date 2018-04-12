@@ -21,6 +21,8 @@ bibliography: /Users/ggloor/Library/texmf/bibtex/bib/bibdesk_refs.bib
 
 Website: https://github.com/ggloor/CoDa_microbiome_tutorial. This will serve as the central repository for the demonstrated tools and workflows. The repository will be set as release 2.0 at the end of the workshop so that participants will have a permanent public record of what was covered.
 
+The Powerpoint presentation can be found at: https://github.com/ggloor/compositions/presentations/CoDa_workshop_NGS18.pptx.
+
 We have adapted and developed tools and protocols for the analysis of HTS as compositional count data [@fernandes:2013;@fernandes:2014;@Quinn206425;@erb:2016]. Analyses conducted under this paradigm are reproducible and robust, and allow conclusions about the relative relationships between features (genes, OTUs, etc) in the underlying environment [@bian:2017;@gloorFrontiers:2017].
 
 It is possible to replace almost all steps in traditional RNA-seq, metagenomics or 16S rRNA gene sequencing analysis with compositionally appropriate methods [@gloorFrontiers:2017] that are robust to data manipulations and that provide reproducible insights into the underlying biology and composition of the system.
@@ -37,7 +39,6 @@ The workshop will enable participants to:
 
 4. have a frame of reference for more complex compositional tools such as `philr` and concepts such as b-association and balance dendrograms.
 
-
 ## Outline
 
 The workshop will be delivered as mixed didactic and participation sessions, with about a 1:4 mixture. Each session will be introduced by a short didactic introduction and demonstration. The remainder of the session will be hands-on learning exercises in the `R` programming environment.
@@ -48,12 +49,16 @@ The outline of this 1-day workshop is:
 
 ### Start time 9am - Introduction (Gloor, didactic lecture)
 
+https://github.com/ggloor/compositions/presentations/CoDa_workshop_NGS18.pptx
+
 - demonstrate and understand the geometry of high throughput sequencing data and how this constrains the analyses
     - demonstrate the pathologies associated with HTS data analyzed using standard methods
     - enable participants to understand why and when the usual methods of analysis are likely to be misleading
     - understand the importance of subcompositional coherence and subcompositional dominance, and how these concepts lead to robust analyses
 
 ### Start time 9:45 - Probabilities and ratio transformations (Gloor, hands on)
+
+source: zero.Rmd
 
 - provide an overview of sequencing as a probabilistic process, and the manipulation of probability vectors using compositional data methods
     - how to generate probability distributions from count data using ALDEx2
@@ -65,6 +70,8 @@ The outline of this 1-day workshop is:
 
 ### Start time 11 - Dimension reduction, outlier identification and clustering (Gloor, hands on)
 
+source: make_interpret_biplot.Rmd, Exploratory_biplot.Rmd
+
 - demonstrate dimension reduction of compositional data
     - the production and interpretation of a compositional PCA biplot
     - identifying outlier samples
@@ -73,6 +80,9 @@ The outline of this 1-day workshop is:
 
 
 ### Start time 12: Correlation and compositional association (Erb)
+
+source: prop_and_diffprop_with_propr
+
 - demonstrate compositionally appropriate identification of correlated (compositionally associated) features using the `propr R` package [@Quinn:2017]
     - an introduction to compositional association
 
@@ -82,6 +92,8 @@ The outline of this 1-day workshop is:
 ### Start time : 2: -  Correlation and compositional association continued (Erb)
 
 ### Start time 2:30 Differential abundance with ALDEx2 (Gloor)
+
+source: ALDEx_comparison.Rmd
 
 - demonstrate compositionally appropriate identification of differentially relatively abundant features using the `ALDEx2 R` package
 	- learn how to generate and interpret posterior expected values for differential relative abundance
