@@ -147,6 +147,40 @@ hist(as.numeric(x.all["YOR290C",4:51]), xlim=c(-11,5), breaks=20, col=rgb(1,0,0,
 hist(as.numeric(x.all["YOR290C",52:99]), add=T,  breaks=3, col=rgb(0,0,1,0.3))
 ```
 
+We can also plot these as strip-charts to see the overlap in variability
+
+```{r, echo=FALSE,eval=TRUE, results='as.is', fig.width=7, fig.height=7, error=FALSE, message=FALSE, warning=FALSE, fig.cap="Strip charts showing the separation between groups when choosing features with differing effect sizes."}
+
+par(mfrow=c(2,2))
+
+stripchart(list(as.numeric(x.all["PWR1",4:51])), pch=19, method="jitter",
+    vertical=T, col=rgb(1,0,0,0.3), main="Effect: 0.5",
+    ylim=c(min(c(as.numeric(x.all["PWR1",4:51]),as.numeric(x.all["PWR1",52:99]))),
+    max(c(as.numeric(x.all["PWR1",4:51]),as.numeric(x.all["PWR1",52:99])))))
+stripchart(list(as.numeric(x.all["PWR1",52:99])), pch=19, method="jitter",
+     add=TRUE, vertical=T, col=rgb(0,0,1,0.3) )
+
+stripchart(list(as.numeric(x.all["NTS2.1",4:51])), pch=19, method="jitter",
+    vertical=T, col=rgb(1,0,0,0.3), main="Effect: 1.1",
+    ylim=c(min(c(as.numeric(x.all["NTS2.1",4:51]),as.numeric(x.all["NTS2.1",52:99]))),
+    max(c(as.numeric(x.all["NTS2.1",4:51]),as.numeric(x.all["NTS2.1",52:99])))))
+stripchart(list(as.numeric(x.all["NTS2.1",52:99])), pch=19, method="jitter",
+     add=TRUE, vertical=T, col=rgb(0,0,1,0.3) )
+
+stripchart(list(as.numeric(x.all["YPR145W",4:51])), pch=19, method="jitter",
+    vertical=T, col=rgb(1,0,0,0.3), main="Effect: 2",
+    ylim=c(min(c(as.numeric(x.all["YPR145W",4:51]),as.numeric(x.all["YPR145W",52:99]))),
+    max(c(as.numeric(x.all["YPR145W",4:51]),as.numeric(x.all["YPR145W",52:99])))))
+stripchart(list(as.numeric(x.all["YPR145W",52:99])), pch=19, method="jitter",
+     add=TRUE, vertical=T, col=rgb(0,0,1,0.3) )
+
+stripchart(list(as.numeric(x.all["YOR290C",4:51])), pch=19, method="jitter",
+    vertical=T, col=rgb(1,0,0,0.3), main="Effect: 5.6",
+    ylim=c(min(c(as.numeric(x.all["YOR290C",4:51]),as.numeric(x.all["YOR290C",52:99]))),
+    max(c(as.numeric(x.all["YOR290C",4:51]),as.numeric(x.all["YOR290C",52:99])))))
+stripchart(list(as.numeric(x.all["YOR290C",52:99])), pch=19, method="jitter",
+     add=TRUE, vertical=T, col=rgb(0,0,1,0.3) )
+```
 
 \newpage
 #References

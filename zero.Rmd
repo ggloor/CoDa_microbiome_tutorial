@@ -62,7 +62,7 @@ hist(one_is_1b, breaks=9, add=T, col=rgb(1,0,0,0.2))
 abline(v=mean(one_is_1))
 abline(v=mean(one_is_1b), col="red")
 ```
-We can generate a scatter plot all vs all for technical replicate 1 vs technical replicate 2 in either Euclidian or log-log space. Note where the imprecision is - at the low count margin.
+We can generate a scatter plot all vs all for technical replicate 7 vs technical replicate 2 in either Euclidian or log-log space. Note where the imprecision is - at the low count margin.
 
 ```{r, echo=TRUE}
 par(mfrow=c(1,2))
@@ -70,6 +70,28 @@ plot(d.n0[,1] + 0.2, d.n0[,2] + 0.2, pch=19, col=rgb(0,0,0,0.1), xlab="replicate
 plot(d[,1] +0.2, d[,2] +0.2, log="xy", pch=19, col=rgb(0,0,0,0.1), xlab="replicate 1", ylab="replicate 2")
 ```
 
+Finally, we can plot the expected value for the other replicates as a function of the reference replicate. This shows quite nicely that the expected value is actually higher than the observed value up to a count of 10-15 in this dataset.
+
+```{r, echo=F}
+output <- matrix(data=NA, nrow=51, ncol=6)
+
+for(j in 0:50){
+    for(i in 1:6){
+      output[j+1, i ] <- mean(d.n0[,i][d.n0[,7] == j]) / (sum(d.n0[,i])/sum(d.n0[,7]))
+    }
+}
+
+x <- seq(0,50, by=1)
+
+rownames(output) = x
+
+par(mfrow=c(1,1))
+boxplot(t(output), xlab="R1 count", ylab="E(R count)")
+abline(h=seq(0,50, by=5), col=rgb(0,0,0,0.3), lty=2)
+abline(v=seq(1,51, by=5), col=rgb(0,0,0,0.3), lty=2)
+abline(-1,1)
+
+```
 In RNA-seq we typically do not have enough samples to have independent power for each feature. We really need about 10 samples for every feature we want to examine independently.
 
  The data are discrete probabilities of observing the feature in the DNA sequencing library scaled by the read count; i.e., converted to integers by 'counting'. If we sequenced 10X deeper, then 0 values would be converted to a integers between 0 and ~10 (sampling). If we sequenced 1000X deeper, then we would get an even better estimate of the actual underlying value for our 0s. Most of the 0s at some point will be converted to a count---so what is an appropriate value for 0? Somewhere between 0 (can never occur in the observable universe) and 1 (we always should see it) is a least likely value that, over many experiments will be least likely to perturb the system? That value is 0.5. Not always the best, usually not the optimum, but in general the least wrong.
