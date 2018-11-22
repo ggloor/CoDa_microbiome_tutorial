@@ -12,6 +12,10 @@ output:
 To run this file:
 Rscript -e "rmarkdown::render('Exploratory_biplot.Rmd')"
 
+## R packages needed
+
+`zCompositions, ppclust, factoextra, cluster, fclust` CRAN
+
 ## The dataset and first biplot
 
 We will use as an example a transcriptome dataset [@Schurch:2016aa;@Gierlinski:2015aa] containing 96 samples, 48 each from wt and SNF2 knockout strain These data have been filtered to include only those features that are present with a mean count of at least 0.1 across all samples.
@@ -44,20 +48,21 @@ codaSeq.outlier <- function(x, plot.me=TRUE, col=rgb(1,0,0,0.3)){
 ```{r biplot, echo=TRUE, results='as.is', fig.width=7, fig.height=7, error=FALSE, message=FALSE, warning=FALSE, fig.cap="The compositional biplot is the workhorse tool for CoDa. This plot summarizes the entire analysis in a qualitative manner. We can see that the op and ak samples separate very well, although the proportion of variance explained on component 1 is small. Furthermore, we can see the genus names of some of the features that are driving this divide. Finally, component 1 has substantially more variance than does componet 2, and we can explain this experiment as a simple two part comparison with the largest variance along the axis of the comparison."}
 
 # read in the dataset and associated taxonomy file
+# samples by row - now correct: thx VGalata
 d.agg <- read.table("data/barton_agg.tsv", sep="\t", header=T, row.names=1)
 
 # load the library zCompositions to perform 0 replacement
 library(zCompositions)
 
 # it is important to first filter to remove rows that are exclusively 0 values
-d.filt <- d.agg[rowSums(d.agg) > 0,]
+d.filt <- d.agg[,colSums(d.agg) > 0,]
 
 # we are using the Count Zero Multiplicative approach
-d.n0 <- cmultRepl(t(d.filt), method="CZM", label=0)
+d.n0 <- cmultRepl(d.filt, method="CZM", label=0)
 
 # generate the centered log-ratio transformed data
 # samples by row
-d.clr <- apply(d.n0, 2, function(x) log(x) - mean(log(x)))
+d.clr <- apply(d.n0, 1, function(x) log(x) - mean(log(x)))
 
 # apply a singular value decomposition to the dataset
 # do not use princomp function in R!!
